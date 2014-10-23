@@ -3,7 +3,7 @@
 
 #include <QDebug>
 
-ThermoCam::ThermoCam(const QByteArray& configFile)
+ThermoCam::ThermoCam(const char* configFile)
     : _cam(new ThermoCamThread(configFile)),
       _image(0)
 {
@@ -19,10 +19,12 @@ ThermoCam::~ThermoCam(void)
 
 void ThermoCam::grab(void)
 {
-    if (!_cam)
-        return;
-
+    if (!_cam) {
+       qDebug() << "[" << __PRETTY_FUNCTION__ << "]: camera not available";
+       exit(1);
+       return;
+    }
     _cam->switchBank();
-    _image = _cam->image();
+    _image       = _cam->image();
     _temperature = _cam->temperature();
 }

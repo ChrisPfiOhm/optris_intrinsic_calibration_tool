@@ -9,21 +9,18 @@
 
 #include <opencv2/opencv.hpp>
 
-namespace optris {
-class Imager;
-}
+#include "PIImager.h"
+#include "ImageBuilder.h"
 
-class ImagerUVC;
 
 class ThermoCamThread : public QThread
 {
     Q_OBJECT
 
 public:
-    ThermoCamThread(const QByteArray& configFile, QObject* parent = 0);
+    ThermoCamThread(const char* configFile, QObject* parent = 0);
     ~ThermoCamThread(void);
 
-    unsigned long serial(void) const { return _serial; }
     const cv::Mat* image(void) const { return &_image[_bank]; }
     const cv::Mat* temperature(void) const { return &_temperature[_bank]; }
     void switchBank(void);
@@ -49,16 +46,14 @@ private:
     void copyToImage(void);
     void switching(void);
 
-    optris::Imager*     _imager;
-    ImagerUVC*          _imagerUVC;
+    optris::PIImager*   _imager;
     unsigned char*      _bufferRaw;
-    const unsigned long _serial;
-    QTimer _timer;
-    QVector<cv::Mat> _image;
-    QVector<cv::Mat> _temperature;
-    QMutex _mutex;
-    BufferBank _bank;
-    QWaitCondition _waitFor;
+    QTimer              _timer;
+    QVector<cv::Mat>    _image;
+    QVector<cv::Mat>    _temperature;
+    QMutex              _mutex;
+    BufferBank          _bank;
+    QWaitCondition      _waitFor;
 };
 
 #endif

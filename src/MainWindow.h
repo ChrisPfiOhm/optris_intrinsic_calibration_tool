@@ -18,7 +18,7 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    MainWindow(const QByteArray& configFile, QWidget* parent = 0);
+    MainWindow(const char* configFile, QWidget* parent = 0);
     virtual ~MainWindow(void);
 
 private slots:
@@ -26,19 +26,21 @@ private slots:
     void calibrate(void);
     void saveToFile(void);
 
+    void slot_calibrationSettings(void);
+
 private:
     void findPoints(std::vector<cv::Point2f>& centers, cv::Mat& image);
     void cvMatToQString(QString& string, const cv::Mat& mat);
 
-    Ui::MainWindow* _ui;
-    OpenCvWidget _undistortView;
-    QTimer _timer;
-    ThermoCam _thermo;
-    ConfigDialog _dialog;
+    Ui::MainWindow*                        _ui;
+    OpenCvWidget                           _undistortView;
+    QTimer                                 _timer;
+    ThermoCam                              _thermo;
+    ConfigDialog                           _dialog;
     std::vector<std::vector<cv::Point2f> > _points;
-    cv::Size _imageSize;
-    cv::Mat _intrinsic;
-    cv::Mat _distortion;
+    cv::Size                               _imageSize;
+    cv::Mat                                _intrinsic;
+    cv::Mat                                _distortion;
 };
 
 #endif

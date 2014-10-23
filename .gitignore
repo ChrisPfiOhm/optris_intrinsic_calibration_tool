@@ -1,1 +1,8 @@
 build/
+*.cxx*
+*cmake
+Makefile
+CMakeCache*
+.cproject
+.project
+

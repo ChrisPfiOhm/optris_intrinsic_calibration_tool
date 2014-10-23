@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>237</width>
-    <height>237</height>
+    <width>240</width>
+    <height>339</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -96,6 +96,32 @@
       </widget>
      </item>
     </layout>
+   </item>
+   <item>
+    <widget class="QComboBox" name="_patternBox">
+     <item>
+      <property name="text">
+       <string>Symetrical Circles</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Chessboard</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Asymetrical Circles</string>
+      </property>
+     </item>
+    </widget>
+   </item>
+   <item>
+    <widget class="QLabel" name="image">
+     <property name="text">
+      <string/>
+     </property>
+    </widget>
    </item>
    <item>
     <spacer name="verticalSpacer">

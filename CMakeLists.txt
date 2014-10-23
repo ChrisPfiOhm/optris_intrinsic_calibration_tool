@@ -16,6 +16,7 @@ set(MOC_HEADERS
     ${SRC_DIR}/OpenCvWidget.h
     ${SRC_DIR}/ThermoCamThread.h
     ${SRC_DIR}/MainWindow.h
+    ${SRC_DIR}/ConfigDialog.h
     )
 
 set(FORMS
@@ -23,8 +24,11 @@ set(FORMS
     ${FORM_DIR}/ConfigDialog.ui
     )
 
+SET(GUI_RESOURCES ${PROJECT_SOURCE_DIR}/resources/resources.qrc)
+
 QT4_WRAP_CPP(HEADERS_MOC ${MOC_HEADERS})
-QT4_WRAP_UI(FORMS_MOC ${FORMS})
+QT4_WRAP_UI(FORMS_MOC    ${FORMS})
+QT4_ADD_RESOURCES(RESOURCES ${GUI_RESOURCES})
 
 include_directories(${PROJECT_SOURCE_DIR}/build
                     ${SRC_DIR}
@@ -41,18 +45,17 @@ add_executable(optris-calibration-tool
                ${SRC_DIR}/MainWindow.cpp
                ${SRC_DIR}/ThermoCamThread.cpp
                ${SRC_DIR}/ThermoCam.cpp
-               ${SRC_DIR}/ImageBuilder.cpp
-               ${SRC_DIR}/ImagerUVC.cpp
                ${SRC_DIR}/VideoDevice.cpp
                ${SRC_DIR}/ConfigDialog.cpp
                ${HEADERS_MOC}
                ${FORMS_MOC}
+               ${RESOURCES}
                )
 
 target_link_libraries(optris-calibration-tool
                       ${QT_LIBRARIES}
                       ${OpenCV_LIBS}
-                      Imager
+                      PIImager
                       ImageProcessing
                       udev
                       )

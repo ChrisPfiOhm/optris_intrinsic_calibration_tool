@@ -1,0 +1,7 @@
+<RCC>
+  <qresource prefix="pattern">
+    <file>acircles_pattern.png</file>
+    <file>circles.png</file>
+    <file>chess_pattern.png</file>
+  </qresource>
+</RCC>

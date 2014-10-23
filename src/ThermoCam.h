@@ -9,7 +9,7 @@ class QByteArray;
 class ThermoCam
 {
 public:
-    ThermoCam(const QByteArray& configFile);
+    ThermoCam(const char* configFile);
     ~ThermoCam(void);
 
     void grab(void);

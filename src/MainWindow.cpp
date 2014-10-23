@@ -12,20 +12,21 @@ const char* TEXT_LABEL_RESULT = "Intrinsic Matrix:\n"
                                 "----------------------------\n";
 }
 
-MainWindow::MainWindow(const QByteArray& configFile, QWidget* parent)
+MainWindow::MainWindow(const char* configFile, QWidget* parent)
     : QMainWindow(parent),
       _ui(new Ui::MainWindow),
-      _thermo(configFile.data())
+      _thermo(configFile)
 {
     _ui->setupUi(this);
     _ui->_buttonCalibrate->setDisabled(true);
 
     QMenuBar* menuBar = this->menuBar();
-    menuBar->addAction("Config Dialog", &_dialog, SLOT(show()));
-    menuBar->addAction("Save", this, SLOT(saveToFile()));
-    menuBar->addAction("Undistort", &_undistortView, SLOT(show()));
+    menuBar->addAction("Config Dialog", &_dialog,        SLOT(show()));
+    menuBar->addAction("Save",         this,             SLOT(saveToFile()));
+    menuBar->addAction("Undistort",    &_undistortView,  SLOT(show()));
 
-    this->connect(&_timer, SIGNAL(timeout()), this, SLOT(tick()));
+    this->connect(_ui->actionOptions,    SIGNAL(triggered()), this, SLOT(slot_calibrationSettings()));
+    this->connect(&_timer,               SIGNAL(timeout()), this, SLOT(tick()));
     this->connect(_ui->_buttonCalibrate, SIGNAL(clicked()), this, SLOT(calibrate()));
 
     _timer.start(33);
@@ -47,17 +48,13 @@ void MainWindow::tick(void)
     this->findPoints(centers, image);
     _ui->_thermoView->setMat(image);
 
-
-    if (!_intrinsic.empty() && !_distortion.empty())
-    {
+    if (!_intrinsic.empty() && !_distortion.empty()) {
         cv::Mat undistortedImage;
         cv::undistort(image, undistortedImage, _intrinsic, _distortion);
         _undistortView.setMat(undistortedImage);
     }
 
-
-    if (!centers.size() || !_ui->_buttonCapture->isChecked())
-        return;
+    if (!centers.size() || !_ui->_buttonCapture->isChecked()) return;
 
     _points.push_back(centers);
     _ui->_buttonCapture->setChecked(false);
@@ -76,14 +73,11 @@ void MainWindow::findPoints(std::vector<cv::Point2f>& centers, cv::Mat& image)
         const uint16_t* dataTemperature = reinterpret_cast<const uint16_t*>(temperature.ptr(row));
         unsigned char* dataTempImage = tempImage.ptr(row);
 
-        for (int col = 0; col < temperature.cols; col++, dataTemperature++)
-        {
+        for (int col = 0; col < temperature.cols; col++, dataTemperature++) {
             const unsigned short temp = *dataTemperature - 1000;
 
-            if (temp < tempMin)
-                *dataTempImage++ = 0xff;
-            else
-                *dataTempImage++ = 0x00;
+            if (temp < tempMin) *dataTempImage++ = 0xff;
+            else                *dataTempImage++ = 0x00;
         }
     }
 
@@ -108,7 +102,7 @@ void MainWindow::calibrate(void)
                                             0.0));
 
     coords.resize(_points.size(), coords[0]);
-    cv::Mat intrinsic(3, 3, CV_64F);
+    cv::Mat intrinsic( 3, 3, CV_64F);
     cv::Mat distortion(1, 8, CV_64F);
     std::vector<cv::Mat> rvecs, tvecs;
 
@@ -141,8 +135,7 @@ void MainWindow::cvMatToQString(QString& string, const cv::Mat& mat)
     stream.setRealNumberPrecision(3);
     stream.setRealNumberNotation(QTextStream::FixedNotation);
 
-    for (int col = 0; col < mat.cols; col++)
-    {
+    for (int col = 0; col < mat.cols; col++) {
         for (int row = 0; row < mat.rows; row++)
         {
             stream.setFieldWidth(8);
@@ -178,3 +171,10 @@ void MainWindow::saveToFile(void)
     fs << "intrinsic" << _intrinsic;
     fs << "distortion" << _distortion;
 }
+
+
+void MainWindow::slot_calibrationSettings(void)
+{
+   _dialog.show();
+}
+
