@@ -106,12 +106,12 @@
      </item>
      <item>
       <property name="text">
-       <string>Chessboard</string>
+       <string>Asymetrical Circles</string>
       </property>
      </item>
      <item>
       <property name="text">
-       <string>Asymetrical Circles</string>
+       <string>Chessboard</string>
       </property>
      </item>
     </widget>
@@ -139,6 +139,13 @@
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_2">
      <item>
+      <widget class="QDialogButtonBox" name="_buttonBox">
+       <property name="standardButtons">
+        <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+       </property>
+      </widget>
+     </item>
+     <item>
       <spacer name="horizontalSpacer">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
@@ -150,13 +157,6 @@
         </size>
        </property>
       </spacer>
-     </item>
-     <item>
-      <widget class="QPushButton" name="_buttonClose">
-       <property name="text">
-        <string>Close</string>
-       </property>
-      </widget>
      </item>
     </layout>
    </item>

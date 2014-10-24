@@ -36,7 +36,7 @@ private:
     OpenCvWidget                           _undistortView;
     QTimer                                 _timer;
     ThermoCam                              _thermo;
-    ConfigDialog                           _dialog;
+    ConfigDialog*                          _dialog;
     std::vector<std::vector<cv::Point2f> > _points;
     cv::Size                               _imageSize;
     cv::Mat                                _intrinsic;

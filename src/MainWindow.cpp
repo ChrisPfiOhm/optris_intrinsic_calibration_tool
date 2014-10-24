@@ -4,7 +4,7 @@
 #include <QDebug>
 #include <QString>
 #include <QTextStream>
-
+#include <QDir>
 #include <iostream>
 
 namespace {
@@ -15,15 +15,11 @@ const char* TEXT_LABEL_RESULT = "Intrinsic Matrix:\n"
 MainWindow::MainWindow(const char* configFile, QWidget* parent)
     : QMainWindow(parent),
       _ui(new Ui::MainWindow),
-      _thermo(configFile)
+      _thermo(configFile),
+      _dialog(new ConfigDialog(QString(QDir::homePath() + "/workspace/optris_intrinsic_calibration_tool/config/pattern.ini")))
 {
     _ui->setupUi(this);
     _ui->_buttonCalibrate->setDisabled(true);
-
-    QMenuBar* menuBar = this->menuBar();
-    menuBar->addAction("Config Dialog", &_dialog,        SLOT(show()));
-    menuBar->addAction("Save",         this,             SLOT(saveToFile()));
-    menuBar->addAction("Undistort",    &_undistortView,  SLOT(show()));
 
     this->connect(_ui->actionOptions,    SIGNAL(triggered()), this, SLOT(slot_calibrationSettings()));
     this->connect(&_timer,               SIGNAL(timeout()), this, SLOT(tick()));
@@ -64,7 +60,7 @@ void MainWindow::tick(void)
 void MainWindow::findPoints(std::vector<cv::Point2f>& centers, cv::Mat& image)
 {
     const cv::Mat& temperature = _thermo.temperature();
-    const unsigned short tempMin = static_cast<unsigned short>(_dialog.threshold() * 10);
+    const unsigned short tempMin = static_cast<unsigned short>(_dialog->threshold() * 10);
 
     cv::Mat tempImage(temperature.rows, temperature.cols, CV_8UC1);
 
@@ -83,7 +79,7 @@ void MainWindow::findPoints(std::vector<cv::Point2f>& centers, cv::Mat& image)
 
     _ui->_thresholdView->setMat(tempImage);
 
-    const cv::Size patternSize(_dialog.cols(), _dialog.rows());
+    const cv::Size patternSize(_dialog->getCols(), _dialog->getRows());
 
     if (cv::findCirclesGrid(tempImage, patternSize, centers, cv::CALIB_CB_SYMMETRIC_GRID))
         cv::drawChessboardCorners(image, patternSize, cv::Mat(centers), true);
@@ -95,10 +91,10 @@ void MainWindow::calibrate(void)
 {
     std::vector<std::vector<cv::Point3f> > coords(1);
 
-    for (unsigned int row = 0; row < _dialog.rows(); row++)
-        for (unsigned int col = 0; col < _dialog.cols(); col++)
-            coords[0].push_back(cv::Point3f(static_cast<float>(row) * _dialog.pointDistance(),
-                                            static_cast<float>(col) * _dialog.pointDistance(),
+    for (unsigned int row = 0; row < _dialog->getRows(); row++)
+        for (unsigned int col = 0; col < _dialog->getCols(); col++)
+            coords[0].push_back(cv::Point3f(static_cast<float>(row) * _dialog->getPointDistance(),
+                                            static_cast<float>(col) * _dialog->getPointDistance(),
                                             0.0));
 
     coords.resize(_points.size(), coords[0]);
@@ -175,6 +171,6 @@ void MainWindow::saveToFile(void)
 
 void MainWindow::slot_calibrationSettings(void)
 {
-   _dialog.show();
+   _dialog->show();
 }
 

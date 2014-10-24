@@ -22,27 +22,51 @@ public:
       Chessboard  = 2
    };
 
-    ConfigDialog(QWidget* parent = 0);
+    ConfigDialog(QString path = "", QWidget* parent = 0);
 
     void loadConfig(QString path);
     void saveConfig(QString path);
 
     float threshold(void) const;
-    unsigned int rows(void) const;
-    unsigned int cols(void) const;
-    float pointDistance(void) const;
+
 
     // GETTERS
+    /**
+     * Function to get the set pattern
+     * @return
+     */
     Pattern getPattern(void) { return _pattern; }
+    /**
+     * Function to get rows of pattern
+     * @return
+     */
+    unsigned int getRows(void);
+    /**
+     * Function to get numbers of columns of pattern
+     * @return
+     */
+    unsigned int getCols(void);
+    /**
+     * Function to get size of pattern in meters
+     * @return
+     */
+    float getPointDistance(void);
+
 
 private slots:
     void slot_patternChanged(int index);
 
+    void slot_accept(void);
+
 private:
     Ui::ConfigDialog* _ui;
 
-    Pattern _pattern;
-    QString _configPath;
+    Pattern       _pattern;
+    unsigned int  _cols;
+    unsigned int  _rows;
+    float         _dist;
+
+    QString    _configPath;
 };
 
 #endif
