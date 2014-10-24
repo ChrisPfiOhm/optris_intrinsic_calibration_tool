@@ -5,6 +5,11 @@
 #include <QString>
 #include <QTextStream>
 #include <QDir>
+
+#include <pcl/common/time.h>
+
+
+
 #include <iostream>
 
 namespace {
@@ -16,7 +21,9 @@ MainWindow::MainWindow(const char* configFile, QWidget* parent)
     : QMainWindow(parent),
       _ui(new Ui::MainWindow),
       _thermo(configFile),
+      _kinect(new pcl::OpenNIGrabber()),
       _dialog(new ConfigDialog(QString(QDir::homePath() + "/workspace/optris_intrinsic_calibration_tool/config/pattern.ini")))
+
 {
     _ui->setupUi(this);
     _ui->_buttonCalibrate->setDisabled(true);
@@ -26,11 +33,17 @@ MainWindow::MainWindow(const char* configFile, QWidget* parent)
     this->connect(_ui->_buttonCalibrate, SIGNAL(clicked()), this, SLOT(calibrate()));
 
     _timer.start(33);
+
+    boost::function<void(const boost::shared_ptr<openni_wrapper::DepthImage>&)> f =
+          boost::bind (&MainWindow::image_cb, this, _1);
+
+    _kinect->registerCallback (f);
+    _kinect->start();
 }
 
 MainWindow::~MainWindow(void)
 {
-
+   _kinect->stop();
 }
 
 void MainWindow::tick(void)
@@ -43,6 +56,7 @@ void MainWindow::tick(void)
 
     this->findPoints(centers, image);
     _ui->_thermoView->setMat(image);
+    _ui->_depthView->setMat(_depth);
 
     if (!_intrinsic.empty() && !_distortion.empty()) {
         cv::Mat undistortedImage;
@@ -55,21 +69,23 @@ void MainWindow::tick(void)
     _points.push_back(centers);
     _ui->_buttonCapture->setChecked(false);
     _ui->_buttonCalibrate->setEnabled(true);
+
+    boost::this_thread::sleep (boost::posix_time::seconds (1));
 }
 
 void MainWindow::findPoints(std::vector<cv::Point2f>& centers, cv::Mat& image)
 {
-    const cv::Mat& temperature = _thermo.temperature();
+    const cv::Mat& temperature   = _thermo.temperature();
     const unsigned short tempMin = static_cast<unsigned short>(_dialog->threshold() * 10);
 
     cv::Mat tempImage(temperature.rows, temperature.cols, CV_8UC1);
 
-    for (int row = 0; row < temperature.rows; row++)
+    for (unsigned int row = 0; row < temperature.rows; row++)
     {
         const uint16_t* dataTemperature = reinterpret_cast<const uint16_t*>(temperature.ptr(row));
         unsigned char* dataTempImage = tempImage.ptr(row);
 
-        for (int col = 0; col < temperature.cols; col++, dataTemperature++) {
+        for (unsigned int col = 0; col < temperature.cols; col++, dataTemperature++) {
             const unsigned short temp = *dataTemperature - 1000;
 
             if (temp < tempMin) *dataTempImage++ = 0xff;
@@ -120,7 +136,7 @@ void MainWindow::calibrate(void)
     this->cvMatToQString(out, distortion);
 
     _ui->_labelResult->setText(out);
-    intrinsic.copyTo(_intrinsic);
+    intrinsic.copyTo( _intrinsic);
     distortion.copyTo(_distortion);
 }
 
@@ -131,8 +147,8 @@ void MainWindow::cvMatToQString(QString& string, const cv::Mat& mat)
     stream.setRealNumberPrecision(3);
     stream.setRealNumberNotation(QTextStream::FixedNotation);
 
-    for (int col = 0; col < mat.cols; col++) {
-        for (int row = 0; row < mat.rows; row++)
+    for (unsigned int col = 0; col < mat.cols; col++) {
+        for (unsigned int row = 0; row < mat.rows; row++)
         {
             stream.setFieldWidth(8);
 
@@ -145,26 +161,20 @@ void MainWindow::cvMatToQString(QString& string, const cv::Mat& mat)
             default:
                 break;
             }
-
             stream.setFieldWidth(0);
             stream << " ";
         }
-
         stream << "\n";
     }
 }
 
 void MainWindow::saveToFile(void)
 {
-    if (_intrinsic.empty() || _distortion.empty())
-    {
-        qDebug() << __PRETTY_FUNCTION__ << ": calibration matrix is empty.";
-        return;
+    if (_intrinsic.empty() || _distortion.empty()) {
+        qDebug() << __PRETTY_FUNCTION__ << ": calibration matrix is empty."; return;
     }
-
     cv::FileStorage fs("calibration.xml", cv::FileStorage::WRITE);
-
-    fs << "intrinsic" << _intrinsic;
+    fs << "intrinsic"  << _intrinsic;
     fs << "distortion" << _distortion;
 }
 

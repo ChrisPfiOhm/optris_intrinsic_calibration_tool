@@ -7,9 +7,15 @@
 
 OpenCvWidget::~OpenCvWidget(void)
 {
-    _mutex.lock();
-    delete _image;
-    _mutex.unlock();
+   _mutex.lock();
+   delete _image;
+   _mutex.unlock();
+
+
+   QSizePolicy qsp(QSizePolicy::Preferred,
+                   QSizePolicy::Preferred);
+   qsp.setHeightForWidth(true);
+   setSizePolicy(qsp);
 }
 
 void OpenCvWidget::setMat(const cv::Mat& mat)

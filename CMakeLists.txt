@@ -4,13 +4,16 @@ set(SRC_DIR ${PROJECT_SOURCE_DIR}/src)
 set(FORM_DIR ${PROJECT_SOURCE_DIR}/forms)
 
 find_package(Qt4 REQUIRED)
+find_package(PCL REQUIRED)
 find_package(OpenCV 2.4.6.1 REQUIRED)
 
 include(${QT_USE_FILE})
+INCLUDE_DIRECTORIES(${PCL_INCLUDE_DIRS})
 
 add_definitions(${QT_DEFINITIONS})
-
+add_definitions(${PCL_DEFINITIONS})
 add_definitions(-Wall -O2 -ffast-math -funroll-loops -ftree-vectorize -fomit-frame-pointer -pipe -mfpmath=sse -mmmx -msse -mtune=core2 -march=core2 -msse2 -msse3 -mssse3 -msse4)
+
 
 set(MOC_HEADERS
     ${SRC_DIR}/OpenCvWidget.h
@@ -36,6 +39,7 @@ include_directories(${PROJECT_SOURCE_DIR}/build
                     )
 
 link_directories(${OpenCV_LIBRARY_DIRS}
+                 ${PCL_LIBRARY_DIRS}
                  ${PROJECT_SOURCE_DIR}/lib
                  )
 
@@ -55,6 +59,7 @@ add_executable(optris-calibration-tool
 target_link_libraries(optris-calibration-tool
                       ${QT_LIBRARIES}
                       ${OpenCV_LIBS}
+                      ${PCL_LIBRARIES}
                       PIImager
                       ImageProcessing
                       udev

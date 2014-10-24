@@ -16,6 +16,8 @@ public:
     OpenCvWidget(QWidget* parent = 0) : QWidget(parent), _image(0) { }
     virtual ~OpenCvWidget(void);
 
+    virtual int heightForWidth ( int w ) const { return _image->height()/_image->width();};
+
 public slots:
     void setMat(const cv::Mat& mat);
 
