@@ -9,7 +9,6 @@
 #include <pcl/common/time.h>
 
 
-
 #include <iostream>
 
 namespace {
@@ -20,153 +19,67 @@ const char* TEXT_LABEL_RESULT = "Intrinsic Matrix:\n"
 MainWindow::MainWindow(const char* configFile, QWidget* parent)
     : QMainWindow(parent),
       _ui(new Ui::MainWindow),
-      _thermo(configFile),
-      _kinect(new pcl::OpenNIGrabber()),
-      _dialog(new ConfigDialog(QString(QDir::homePath() + "/workspace/optris_intrinsic_calibration_tool/config/pattern.ini")))
-
+      _dialog(new ConfigDialog(QString(QDir::homePath() + "/workspace/optris_intrinsic_calibration_tool/config/pattern.ini"))),
+      _openni_sensor(new Openni()),
+      _thermo_sensor(new ThermoCam(configFile)),
+      _rgb_sensor(new RGBCamera())
 {
     _ui->setupUi(this);
     _ui->_buttonCalibrate->setDisabled(true);
 
+    _intrinsic_calibration.setPattern(_dialog->getPattern(),
+                                      cv::Size(_dialog->getRows(), _dialog->getCols()),
+                                      _dialog->getPointDistance());
+
     this->connect(_ui->actionOptions,    SIGNAL(triggered()), this, SLOT(slot_calibrationSettings()));
-    this->connect(&_timer,               SIGNAL(timeout()), this, SLOT(tick()));
-    this->connect(_ui->_buttonCalibrate, SIGNAL(clicked()), this, SLOT(calibrate()));
+    this->connect(&_timer,               SIGNAL(timeout()),   this, SLOT(tick()));
+    this->connect(_ui->_buttonCalibrate, SIGNAL(clicked()),   this, SLOT(calibrate()));
 
     _timer.start(33);
-
-    boost::function<void(const boost::shared_ptr<openni_wrapper::DepthImage>&)> f =
-          boost::bind (&MainWindow::image_cb, this, _1);
-
-    _kinect->registerCallback (f);
-    _kinect->start();
 }
 
 MainWindow::~MainWindow(void)
 {
-   _kinect->stop();
+   // nothing to do here
 }
 
 void MainWindow::tick(void)
 {
-    _thermo.grab();
+   static unsigned int i=0;
+//    _thermo.grab();
+    _thermo_sensor->grab();
+    _openni_sensor->grab();
+    _rgb_sensor->grab();
 
-    cv::Mat image(_thermo.image());
-    _imageSize = image.size();
-    std::vector<cv::Point2f> centers;
+     cv::Mat image(_rgb_sensor->getCalibrationImage());
+     cv::Mat colorImage(_rgb_sensor->getVisualizationImage());
 
-    this->findPoints(centers, image);
-    _ui->_thermoView->setMat(image);
-    _ui->_depthView->setMat(_depth);
+     if(i%50 == 0)_intrinsic_calibration.setImage(image, colorImage);
 
-    if (!_intrinsic.empty() && !_distortion.empty()) {
-        cv::Mat undistortedImage;
-        cv::undistort(image, undistortedImage, _intrinsic, _distortion);
-        _undistortView.setMat(undistortedImage);
-    }
+     i++;
 
-    if (!centers.size() || !_ui->_buttonCapture->isChecked()) return;
 
-    _points.push_back(centers);
-    _ui->_buttonCapture->setChecked(false);
-    _ui->_buttonCalibrate->setEnabled(true);
-
-    boost::this_thread::sleep (boost::posix_time::seconds (1));
-}
-
-void MainWindow::findPoints(std::vector<cv::Point2f>& centers, cv::Mat& image)
-{
-    const cv::Mat& temperature   = _thermo.temperature();
-    const unsigned short tempMin = static_cast<unsigned short>(_dialog->threshold() * 10);
-
-    cv::Mat tempImage(temperature.rows, temperature.cols, CV_8UC1);
-
-    for (unsigned int row = 0; row < temperature.rows; row++)
-    {
-        const uint16_t* dataTemperature = reinterpret_cast<const uint16_t*>(temperature.ptr(row));
-        unsigned char* dataTempImage = tempImage.ptr(row);
-
-        for (unsigned int col = 0; col < temperature.cols; col++, dataTemperature++) {
-            const unsigned short temp = *dataTemperature - 1000;
-
-            if (temp < tempMin) *dataTempImage++ = 0xff;
-            else                *dataTempImage++ = 0x00;
-        }
-    }
-
-    _ui->_thresholdView->setMat(tempImage);
-
-    const cv::Size patternSize(_dialog->getCols(), _dialog->getRows());
-
-    if (cv::findCirclesGrid(tempImage, patternSize, centers, cv::CALIB_CB_SYMMETRIC_GRID))
-        cv::drawChessboardCorners(image, patternSize, cv::Mat(centers), true);
+    // update visualization
+    _ui->_thermoView->setMat(   _thermo_sensor->getVisualizationImage());
+    if(_intrinsic_calibration.calibrated())
+       _ui->_thresholdView->setMat(_intrinsic_calibration.getUndistored(colorImage));
     else
-        centers.clear();
+       _ui->_thresholdView->setMat(colorImage);
+
+    _ui->_depthView->setMat(    _openni_sensor->getVisualizationImage());
+
+
+    if(_intrinsic_calibration.getNrOfValids() >20)
+       _ui->_buttonCalibrate->setDisabled(false);
 }
 
 void MainWindow::calibrate(void)
 {
-    std::vector<std::vector<cv::Point3f> > coords(1);
-
-    for (unsigned int row = 0; row < _dialog->getRows(); row++)
-        for (unsigned int col = 0; col < _dialog->getCols(); col++)
-            coords[0].push_back(cv::Point3f(static_cast<float>(row) * _dialog->getPointDistance(),
-                                            static_cast<float>(col) * _dialog->getPointDistance(),
-                                            0.0));
-
-    coords.resize(_points.size(), coords[0]);
-    cv::Mat intrinsic( 3, 3, CV_64F);
-    cv::Mat distortion(1, 8, CV_64F);
-    std::vector<cv::Mat> rvecs, tvecs;
-
-    QString out(TEXT_LABEL_RESULT);
-    QTextStream stream(&out);
-    stream.setRealNumberPrecision(3);
-    stream.setRealNumberNotation(QTextStream::FixedNotation);
-
-    stream << "number of points   : " << _points.size() << "\n";
-    stream << "rms error intrinsic: "
-           << cv::calibrateCamera(coords, _points, _imageSize, intrinsic, distortion, rvecs, tvecs)
-           << "\n\n";
-
-    stream << "intrinsic:\n";
-    this->cvMatToQString(out, intrinsic);
-    stream << "\n";
-
-    stream << "distortion:\n";
-    this->cvMatToQString(out, distortion);
-
-    _ui->_labelResult->setText(out);
-    intrinsic.copyTo( _intrinsic);
-    distortion.copyTo(_distortion);
+   _intrinsic_calibration.calibrate();
+   std::cout << _intrinsic_calibration.getIntrinsic()  << std::endl;
+   std::cout << _intrinsic_calibration.getDistortion() << std::endl;
 }
 
-void MainWindow::cvMatToQString(QString& string, const cv::Mat& mat)
-{
-    QTextStream stream(&string);
-    stream.setFieldAlignment(QTextStream::AlignRight);
-    stream.setRealNumberPrecision(3);
-    stream.setRealNumberNotation(QTextStream::FixedNotation);
-
-    for (unsigned int col = 0; col < mat.cols; col++) {
-        for (unsigned int row = 0; row < mat.rows; row++)
-        {
-            stream.setFieldWidth(8);
-
-            switch (mat.type())
-            {
-            case CV_64F:
-                stream << mat.at<double>(row, col);
-                break;
-
-            default:
-                break;
-            }
-            stream.setFieldWidth(0);
-            stream << " ";
-        }
-        stream << "\n";
-    }
-}
 
 void MainWindow::saveToFile(void)
 {
@@ -182,5 +95,9 @@ void MainWindow::saveToFile(void)
 void MainWindow::slot_calibrationSettings(void)
 {
    _dialog->show();
+   _intrinsic_calibration.setPattern(_dialog->getPattern(),
+                                     cv::Size(9, 6),
+                                     0.06);
+
 }
 

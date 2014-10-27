@@ -9,8 +9,8 @@
 
 #include <opencv2/opencv.hpp>
 
-#include "PIImager.h"
-#include "ImageBuilder.h"
+#include <sensors/ImageBuilder.h>
+#include <sensors/PIImager.h>
 
 
 class ThermoCamThread : public QThread

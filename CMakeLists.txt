@@ -17,9 +17,10 @@ add_definitions(-Wall -O2 -ffast-math -funroll-loops -ftree-vectorize -fomit-fra
 
 set(MOC_HEADERS
     ${SRC_DIR}/OpenCvWidget.h
-    ${SRC_DIR}/ThermoCamThread.h
+    ${SRC_DIR}/sensors/ThermoCamThread.h
     ${SRC_DIR}/MainWindow.h
     ${SRC_DIR}/ConfigDialog.h
+    ${SRC_DIR}/IntrinsicCalibration.h
     )
 
 set(FORMS
@@ -47,10 +48,12 @@ add_executable(optris-calibration-tool
                ${SRC_DIR}/main.cpp
                ${SRC_DIR}/OpenCvWidget.cpp
                ${SRC_DIR}/MainWindow.cpp
-               ${SRC_DIR}/ThermoCamThread.cpp
-               ${SRC_DIR}/ThermoCam.cpp
-               ${SRC_DIR}/VideoDevice.cpp
+               ${SRC_DIR}/sensors/ThermoCamThread.cpp
+               ${SRC_DIR}/sensors/ThermoCam.cpp
+               ${SRC_DIR}/sensors/Openni.cpp
                ${SRC_DIR}/ConfigDialog.cpp
+               ${SRC_DIR}/IntrinsicCalibration.cpp
+               ${SRC_DIR}/sensors/RGBCamera.cpp
                ${HEADERS_MOC}
                ${FORMS_MOC}
                ${RESOURCES}

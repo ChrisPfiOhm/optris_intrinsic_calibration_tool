@@ -1,6 +1,6 @@
-#include "ImageBuilder.h"
+#include <sensors/ImageBuilder.h>
+#include <sensors/IronPalette.h>
 #include "limits.h"
-#include "IronPalette.h"
 #include "BlackWhitePalette.h"
 
 namespace optris

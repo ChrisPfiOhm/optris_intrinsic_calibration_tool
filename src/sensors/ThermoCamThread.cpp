@@ -1,8 +1,7 @@
-#include "ThermoCamThread.h"
-
+#include <sensors/ImageBuilder.h>
+#include <sensors/Imager.h>
+#include <sensors/ThermoCamThread.h>
 #include "Imager.h"
-#include "ImageBuilder.h"
-
 #include <QByteArray>
 #include <QDebug>
 
