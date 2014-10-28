@@ -65,9 +65,12 @@ public:
      */
     virtual void grab(void);
 
-
-
 private:
+    /**
+     * Function to generate binary image
+     * @param temperature
+     * @return
+     */
     cv::Mat generateBin(const cv::Mat temperature);
 
     ThermoCamThread* _cam;

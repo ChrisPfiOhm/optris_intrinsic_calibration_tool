@@ -75,6 +75,8 @@ public:
 
    bool calibrated(void) { return _calibration_flag; }
 
+   void saveToFile(void);
+
 private:
    void cvMatToQString(QString& string, const cv::Mat& mat);
 

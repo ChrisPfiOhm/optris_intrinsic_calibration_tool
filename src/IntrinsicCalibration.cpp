@@ -40,12 +40,10 @@ bool IntrinsicCalibration::setImage(cv::Mat binaryImage, cv::Mat colorImage)
 
    if (cv::findCirclesGrid(binaryImage, _pattern_size, centers, (cv::CALIB_CB_SYMMETRIC_GRID) |
                                                                  cv::CALIB_CB_ADAPTIVE_THRESH |
-                                                                 cv::CALIB_CB_FAST_CHECK))
-   {
+                                                                 cv::CALIB_CB_FAST_CHECK)) {
        cv::drawChessboardCorners(colorImage, _pattern_size, cv::Mat(centers), true);
    }
-   else
-   {
+   else {
        centers.clear();
    }
 
@@ -73,7 +71,6 @@ void IntrinsicCalibration::setPattern(ConfigDialog::Pattern type, cv::Size size,
 bool IntrinsicCalibration::calibrate(void)
 {
    std::vector<std::vector<cv::Point3f> > coords(1);
-
 
    _pattern_dist = 0.06;
 
@@ -119,7 +116,7 @@ void IntrinsicCalibration::cvMatToQString(QString& string, const cv::Mat& mat)
     stream.setRealNumberPrecision(3);
     stream.setRealNumberNotation(QTextStream::FixedNotation);
 
-    for (int col = 0; col < mat.cols; col++) {
+    for (    int col = 0; col < mat.cols; col++) {
         for (int row = 0; row < mat.rows; row++)
         {
             stream.setFieldWidth(8);
@@ -139,3 +136,15 @@ void IntrinsicCalibration::cvMatToQString(QString& string, const cv::Mat& mat)
         stream << "\n";
     }
 }
+
+void IntrinsicCalibration::saveToFile(void)
+{
+   if (_intrinsic.empty() || _distortion.empty()) {
+       qDebug() << __PRETTY_FUNCTION__ << ": calibration matrix is empty."; return;
+   }
+   cv::FileStorage fs("calibration.xml", cv::FileStorage::WRITE);
+   fs << "intrinsic"  << _intrinsic;
+   fs << "distortion" << _distortion;
+}
+
+

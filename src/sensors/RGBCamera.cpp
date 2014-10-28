@@ -9,8 +9,8 @@
 
 #include "opencv2/highgui/highgui.hpp"
 
-RGBCamera::RGBCamera()
-:  _camera(new cv::VideoCapture(1))
+RGBCamera::RGBCamera(const unsigned int id)
+:  _camera(new cv::VideoCapture(id))
 {
 
 }

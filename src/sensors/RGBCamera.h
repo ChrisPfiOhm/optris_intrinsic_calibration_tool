@@ -10,13 +10,20 @@
 
 #include "ISensor.h"
 
+/**
+ * @class   RGBCamera
+ * @author  Christian Pfitzner
+ * @date    2014-10-27
+ *
+ * @brief   Wrapper for opencv camera grabber
+ */
 class RGBCamera : public ISensor
 {
 public:
    /**
     * Default constructor
     */
-   RGBCamera(void);
+   RGBCamera(const unsigned int id=0);
    /**
     * Default destructor
     */
@@ -34,16 +41,18 @@ public:
     */
    virtual const cv::Mat& getVisualizationImage(void)   { return _image; }
 
-
    // OTHERS
+   /**
+    * Function to grab image from device
+    */
    virtual void grab(void);
 
 
 private:
-   cv::VideoCapture*        _camera;
+   cv::VideoCapture*        _camera;      //!< camera grabber
 
-   cv::Mat    _image;
-   cv::Mat    _bin;
+   cv::Mat                  _image;       //!< normal color image
+   cv::Mat                  _bin;         //!< greyscale image
 
 };
 #endif /* SRC_SENSORS_RGBCAMERA_H_ */

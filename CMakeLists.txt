@@ -53,6 +53,8 @@ add_executable(optris-calibration-tool
                ${SRC_DIR}/sensors/Openni.cpp
                ${SRC_DIR}/ConfigDialog.cpp
                ${SRC_DIR}/IntrinsicCalibration.cpp
+               ${SRC_DIR}/ExtrinsicCalibration.cpp
+               
                ${SRC_DIR}/sensors/RGBCamera.cpp
                ${HEADERS_MOC}
                ${FORMS_MOC}
