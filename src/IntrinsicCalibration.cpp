@@ -19,10 +19,12 @@
 
 
 IntrinsicCalibration::IntrinsicCalibration(void)
-:  _pattern_type(ConfigDialog::SymCircles),
+:  QObject(0),
+   _pattern_type(ConfigDialog::SymCircles),
    _valid(0),
-   _pattern_dist(0.06),
-   _calibration_flag(false)
+   _pattern_dist(0.075),
+   _calibration_flag(false),
+   _capture(false)
 {
 
 }
@@ -38,24 +40,42 @@ bool IntrinsicCalibration::setImage(cv::Mat binaryImage, cv::Mat colorImage)
    std::vector<cv::Point2f> centers;
    _image_size = binaryImage.size();
 
-   if (cv::findCirclesGrid(binaryImage, _pattern_size, centers, (cv::CALIB_CB_SYMMETRIC_GRID) |
-                                                                 cv::CALIB_CB_ADAPTIVE_THRESH |
-                                                                 cv::CALIB_CB_FAST_CHECK)) {
+
+   // set up the parameters (check the defaults in opencv's code in blobdetector.cpp)
+   cv::SimpleBlobDetector::Params params;
+   params.minDistBetweenBlobs = 2.0f;
+   params.filterByInertia     = true;
+   params.filterByConvexity   = false;
+   params.filterByColor       = true;
+   params.filterByCircularity = false;
+   params.filterByArea        = true;
+   params.minArea             = 5.0f;
+   params.maxArea             = 10000.0f;
+
+   cv::Ptr<cv::FeatureDetector> _blob_detector = new cv::SimpleBlobDetector(params);
+   _blob_detector->create("SimpleBlob");
+
+
+   if (cv::findCirclesGrid(binaryImage, _pattern_size, centers, (cv::CALIB_CB_SYMMETRIC_GRID |
+                                                                 cv::CALIB_CB_ADAPTIVE_THRESH),
+                                                                 _blob_detector)){
        cv::drawChessboardCorners(colorImage, _pattern_size, cv::Mat(centers), true);
    }
    else {
        centers.clear();
    }
 
-   // push back points for calibration
-   if(centers.size() > 0) {
-      _points.push_back(centers);
-      qDebug() << _valid++;
-      return true;
+   if(_capture)
+   {
+      _capture = false;
+      // push back points for calibration
+      if(centers.size() > 0) {
+         _points.push_back(centers);
+         qDebug() << _valid++;
+         return true;
+      }
    }
-   else {
-      return false;
-   }
+   return false;
 }
 
 
@@ -72,7 +92,7 @@ bool IntrinsicCalibration::calibrate(void)
 {
    std::vector<std::vector<cv::Point3f> > coords(1);
 
-   _pattern_dist = 0.06;
+   _pattern_dist = 0.075;
 
 
    for (    int row = 0; row < _pattern_size.height; row++)
@@ -145,6 +165,12 @@ void IntrinsicCalibration::saveToFile(void)
    cv::FileStorage fs("calibration.xml", cv::FileStorage::WRITE);
    fs << "intrinsic"  << _intrinsic;
    fs << "distortion" << _distortion;
+}
+
+
+void IntrinsicCalibration::slot_capture(void)
+{
+   _capture = true;
 }
 
 

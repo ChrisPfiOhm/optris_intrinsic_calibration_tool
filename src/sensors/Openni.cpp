@@ -30,7 +30,7 @@ Openni::~Openni(void)
 
 void Openni::grab(void)
 {
-   cv::threshold(_depth, _bin, 10, 255, cv::THRESH_BINARY);
+//   cv::threshold(_depth, _bin, 140, 255, cv::THRESH_BINARY);
 }
 
 
@@ -56,13 +56,20 @@ void Openni::image_cb (const boost::shared_ptr<openni_wrapper::Image>& img)
 
 void Openni::depthToCV8UC1(const cv::Mat& float_img, cv::Mat& mono8_img)
 {
-   if(mono8_img.rows != float_img.rows || mono8_img.cols != float_img.cols)
-   {
+   if(mono8_img.rows != float_img.rows || mono8_img.cols != float_img.cols) {
       mono8_img = cv::Mat(float_img.size(), CV_8UC1);
    }
 
-   //The following doesn't work if there are NaNs
    double minVal, maxVal;
    minMaxLoc(float_img, &minVal, &maxVal);
-   cv::convertScaleAbs(float_img, mono8_img, 100, 0.0);
+   cv::convertScaleAbs(float_img, mono8_img, 255);
+
+//   for(    int row = 0; row < float_img.rows; row++){
+//       for(int col = 0; col < float_img.cols; col++) {
+//           if (float_img.at<double>(row, col) <= 0.1)
+//              mono8_img.at<bool>(row, col) = false;
+//           else
+//              mono8_img.at<bool>(row, col) = true;
+//       }
+//   }
 }

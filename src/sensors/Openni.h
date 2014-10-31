@@ -40,10 +40,9 @@ public:
    /**
     * Function to get calibration image. Implementation from pure virtual method.
     */
-   virtual const cv::Mat& getCalibrationImage(void) { return _bin; }
+   virtual const cv::Mat& getCalibrationImage(void)   { return _bin; }
 
    virtual const cv::Mat& getVisualizationImage(void) { return _depth; }
-
    /**
     * Function to return depth image as cv mat
     * @return
@@ -76,7 +75,6 @@ private:
    void depthToCV8UC1(const cv::Mat& float_img, cv::Mat& mono8_img);
 
    pcl::OpenNIGrabber*                    _kinect;
-
 
 
    cv::Mat  _bin;

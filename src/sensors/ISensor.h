@@ -27,15 +27,35 @@ public:
     * Abstract method grab
     */
    virtual void grab(void) = 0;
+
+   // SAVE AND LOAD
+   //! @todo implement load configuration for intrinsic and extrinsic parameters
+//   void loadConfig(QString path) = 0;
+   //! @todo implement save configuration for intrinsic and extrinsic parameters
+//   void saveConfig(QString path) = 0;
+
+   // GETTERS
    /**
     * Abstract method to get calibration image
     * @return
     */
-   virtual const cv::Mat& getCalibrationImage(void) = 0;
-
+   virtual const cv::Mat& getCalibrationImage(void)   = 0;
+   /**
+    * Abstract method to get image for visualization
+    * @return
+    */
    virtual const cv::Mat& getVisualizationImage(void) = 0;
-private:
 
+   virtual const cv::Mat& getIntrinsic(void)  const  { return _intrinsic;  }
+   virtual const cv::Mat& getDistortion(void) const  { return _distortion; }
+
+   // SETTERS
+   virtual void setIntrinsic(cv::Mat& intrinsic)   { _intrinsic = intrinsic; }
+   virtual void setDistortion(cv::Mat& distortion) { _distortion = distortion; }
+
+private:
+   cv::Mat _intrinsic;
+   cv::Mat _distortion;
 };
 
 

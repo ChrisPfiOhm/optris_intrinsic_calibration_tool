@@ -39,6 +39,8 @@ public:
     QVBoxLayout *verticalLayout_2;
     OpenCvWidget *_thermoView;
     OpenCvWidget *_thresholdView;
+    OpenCvWidget *_depthView;
+    QSpacerItem *horizontalSpacer;
     QVBoxLayout *verticalLayout;
     QPushButton *_buttonCalibrate;
     QPushButton *_buttonCapture;
@@ -76,8 +78,17 @@ public:
 
         verticalLayout_2->addWidget(_thresholdView);
 
+        _depthView = new OpenCvWidget(centralwidget);
+        _depthView->setObjectName(QString::fromUtf8("_depthView"));
+
+        verticalLayout_2->addWidget(_depthView);
+
 
         horizontalLayout->addLayout(verticalLayout_2);
+
+        horizontalSpacer = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
+
+        horizontalLayout->addItem(horizontalSpacer);
 
         verticalLayout = new QVBoxLayout();
         verticalLayout->setObjectName(QString::fromUtf8("verticalLayout"));

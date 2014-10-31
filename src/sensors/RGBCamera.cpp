@@ -32,6 +32,6 @@ void RGBCamera::grab(void)
 
    cv::Mat viewGray;
    cvtColor(     _image, _bin, cv::COLOR_BGR2GRAY);
-//   cv::threshold(_bin,   _bin, 120, 255, cv::THRESH_BINARY);
 
+   _bin =  cv::Scalar::all(255) - _bin;
 }

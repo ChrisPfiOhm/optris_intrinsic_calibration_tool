@@ -17,6 +17,7 @@ add_definitions(-Wall -O2 -ffast-math -funroll-loops -ftree-vectorize -fomit-fra
 
 set(MOC_HEADERS
     ${SRC_DIR}/OpenCvWidget.h
+    ${SRC_DIR}/CalibrationViewWidget.h
     ${SRC_DIR}/sensors/ThermoCamThread.h
     ${SRC_DIR}/MainWindow.h
     ${SRC_DIR}/ConfigDialog.h
@@ -26,6 +27,7 @@ set(MOC_HEADERS
 set(FORMS
     ${FORM_DIR}/MainWindow.ui
     ${FORM_DIR}/ConfigDialog.ui
+    ${FORM_DIR}/CalibrationViewWidget.ui
     )
 
 SET(GUI_RESOURCES ${PROJECT_SOURCE_DIR}/resources/resources.qrc)
@@ -47,6 +49,7 @@ link_directories(${OpenCV_LIBRARY_DIRS}
 add_executable(optris-calibration-tool
                ${SRC_DIR}/main.cpp
                ${SRC_DIR}/OpenCvWidget.cpp
+               ${SRC_DIR}/CalibrationViewWidget.cpp
                ${SRC_DIR}/MainWindow.cpp
                ${SRC_DIR}/sensors/ThermoCamThread.cpp
                ${SRC_DIR}/sensors/ThermoCam.cpp
