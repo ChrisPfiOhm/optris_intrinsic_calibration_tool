@@ -88,6 +88,16 @@
        </spacer>
       </item>
       <item>
+       <widget class="OpenCvWidget" name="_fusion" native="true">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>80</height>
+         </size>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QLabel" name="_labelResult">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
@@ -165,6 +175,12 @@
    <class>CalibrationViewWidget</class>
    <extends>QWidget</extends>
    <header>CalibrationViewWidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>OpenCvWidget</class>
+   <extends>QWidget</extends>
+   <header>OpenCvWidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

@@ -5,8 +5,8 @@
 ThermoCam::ThermoCam(const char* configFile)
     : _cam(new ThermoCamThread(configFile)),
       _bin_th(18.0),
-      _temperature(NULL),
-      _image(NULL)
+      _image(NULL),
+      _temperature(NULL)
 {
 
 }
@@ -18,13 +18,13 @@ ThermoCam::~ThermoCam(void)
     delete _cam;
 }
 
+
 void ThermoCam::grab(void)
 {
    if (!_cam) {
       qDebug() << "[" << __PRETTY_FUNCTION__ << "]: camera not available"; exit(1);
       return;
    }
-
 
    _cam->switchBank();
    _image       = _cam->image();
@@ -39,7 +39,6 @@ cv::Mat ThermoCam::generateBin(const cv::Mat temperature)
 {
    const unsigned short tempMin = static_cast<unsigned short>(30* 10);
    const unsigned short tempMax = static_cast<unsigned short>(30* 10);
-
 
    cv::Mat tempImage(temperature.rows, temperature.cols, CV_8UC1);
 
@@ -60,6 +59,5 @@ cv::Mat ThermoCam::generateBin(const cv::Mat temperature)
    }
 
    return(tempImage);
-
 }
 

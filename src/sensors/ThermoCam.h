@@ -35,6 +35,7 @@ public:
      */
     void setTemperatureThreshold(const float th=30)      { _bin_th = th; }
 
+
     // GETTERS
     /**
      * Function to implement pure virtual method from interface to return binary image
@@ -75,11 +76,11 @@ private:
 
     ThermoCamThread* _cam;
 
-    float   _bin_th;
+    float            _bin_th;
 
     const cv::Mat*   _image;
     const cv::Mat*   _temperature;
-    cv::Mat    _bin;
+    cv::Mat          _bin;
 };
 
 #endif

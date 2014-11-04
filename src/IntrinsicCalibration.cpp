@@ -58,19 +58,16 @@ bool IntrinsicCalibration::setImage(cv::Mat binaryImage, cv::Mat colorImage)
    _blob_detector->create("SimpleBlob");
 
 
-   if (cv::findCirclesGrid(binaryImage, _pattern_size, centers, (cv::CALIB_CB_SYMMETRIC_GRID |
-                                                                 cv::CALIB_CB_FAST_CHECK     |
-                                                                 cv::CALIB_CB_ADAPTIVE_THRESH),
-                                                                 _blob_detector)){
+   if (cv::findCirclesGrid(binaryImage, _pattern_size, centers,
+      (cv::CALIB_CB_SYMMETRIC_GRID | cv::CALIB_CB_ADAPTIVE_THRESH), _blob_detector))
+   {
        cv::drawChessboardCorners(colorImage, _pattern_size, cv::Mat(centers), true);
    }
    else {
        centers.clear();
    }
 
-   if(_capture)
-   {
-      qDebug() << __PRETTY_FUNCTION__;
+   if(_capture) {
       _capture = false;
       // push back points for calibration
       if(centers.size() > 0) {

@@ -45,7 +45,7 @@ public:
     * Function to return image for visualization
     * @return
     */
-   virtual const cv::Mat& getVisualizationImage(void) { return _depth; }
+   virtual const cv::Mat& getVisualizationImage(void) { return _bin; }
    /**
     * Function to return depth image as cv mat
     * @return

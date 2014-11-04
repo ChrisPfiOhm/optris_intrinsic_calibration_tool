@@ -37,13 +37,16 @@ public:
     * @param image1
     * @param image2
     */
-   bool setImages(cv::Mat image1, cv::Mat image2);
+   bool capture(cv::Mat image1WithMarkers, cv::Mat image2WithMarkers);
    /**
     * Function to set type of calibration pattern
     * @param type
     * @param size
     */
    void setPattern(ConfigDialog::Pattern type, cv::Size size, const float dist);
+
+   void addPoints(std::vector<cv::Point2f> p1,
+                  std::vector<cv::Point2f> p2);
 
    // SETTERS
    /**
@@ -74,33 +77,47 @@ public:
     */
    const unsigned int& getNrOfValids(void) const { return _valid; }
 
+   void setImage1(const cv::Mat image) { _image1 = image; }
+
+   void setImage2(const cv::Mat image) { _image2 = image; }
+
    // OTHERS
+   /**
+    * Function to call for calibration
+    * @return
+    */
    bool calibrate(void);
 
+   bool calibrated(void) { return _calibrated; }
+
+   void undistore(const cv::Mat& image1, const cv::Mat& image2);
+
 private:
-   std::vector<std::vector<cv::Point2f> > _points1;
-   std::vector<std::vector<cv::Point2f> > _points2;
+   std::vector<std::vector<cv::Point2f> > _points1;         //!< found points for first sensor
+   std::vector<std::vector<cv::Point2f> > _points2;         //!< found points for second sensor
 
+   // members to describe pattern
+   ConfigDialog::Pattern                  _pattern_type;    //!< type of pattern
+   cv::Size                               _pattern_size;    //!< size in x and y of pattern
+   float                                  _pattern_dist;    //!< distance for the pattern
 
+   cv::Mat  _image1;
+   cv::Mat  _image2;
 
-   ConfigDialog::Pattern _pattern_type;
-   cv::Size              _pattern_size;
-   float                 _pattern_dist;
+   cv::Mat                                _intrinsic1;      //!< intrinsic matrix for sensor 1
+   cv::Mat                                _intrinsic2;      //!< intrinsic matrix for sensor 2
 
-   cv::Mat _intrinsic1;
-   cv::Mat _distortion1;
-   cv::Mat _intrinsic2;
-   cv::Mat _distortion2;
+   cv::Mat                                _distortion1;     //!< distortion parameter for sensor 1
+   cv::Mat                                _distortion2;     //!< distortion parameter for sensor 1
 
+   cv::Size                               _image_size;      //!< size of the image from sensor 1
 
-   cv::Size _image_size;
+   cv::Mat                                _R;               //!< estimated rotation matrix between the two sensors
+   cv::Mat                                _r;               //!< rotation vector
+   cv::Mat                                _t;               //!< estimated transformation matrix between the two sensors
 
-   cv::Mat _R;
-   cv::Mat _T;
-
-   unsigned int          _valid;
-
-
+   unsigned int                           _valid;           //!< number of valid frames for calibration
+   bool                                   _calibrated;
 };
 
 #endif /* SRC_EXTRINSICCALIBRATION_H_ */

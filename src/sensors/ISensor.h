@@ -53,28 +53,49 @@ public:
       QSettings settings(path, QSettings::NativeFormat);
 
 
-      cv::Mat intrinsic = cv::Mat::zeros(3, 3, CV_32F);
+      cv::Mat intrinsic = cv::Mat::zeros(3, 3, CV_64F);
       settings.beginGroup("calibration");
       int size = settings.beginReadArray("intrinsic");
-      for(int i=0 ; i<size ; i++)
-      {
-         settings.setArrayIndex(i);
-         int row = floor(i/3);
-         int col = i%3;
-         intrinsic.at<double>(row, col) = settings.value("intrinsic").toDouble();
+
+      // check for size of intrinsic matrix
+      if(size != 9) {
+         qDebug() << "[" <<__PRETTY_FUNCTION__ << "]: error in config file " << path;
+         qDebug() << "[" <<__PRETTY_FUNCTION__ << "]: size of intrinsic wrong";
+         return;
+      }
+
+      unsigned int idx = 0;
+      for (   int col=0; col<intrinsic.cols ; col++) {
+         for (int row=0; row<intrinsic.rows ; row++)
+         {
+            settings.setArrayIndex(idx);
+            intrinsic.at<double>(row, col) = settings.value("value").toDouble();
+            idx++;
+         }
       }
       settings.endArray();
 
 
-      cv::Mat distortion = cv::Mat::zeros(1, 5, CV_32F);
+      cv::Mat distortion = cv::Mat::zeros(1, 5, CV_64F);
       size = settings.beginReadArray("distortion");
-      for(int i=0 ; i<size ; i++)
-      {
-         settings.setArrayIndex(i);
-         int row = 0;
-         int col = i;
-         distortion.at<double>(row, col) = settings.value("distortion").toDouble();
+
+      // check for size of distortion parameters
+      if(size != 5) {
+         qDebug() << "[" <<__PRETTY_FUNCTION__ << "]: error in config file " << path;
+         qDebug() << "[" <<__PRETTY_FUNCTION__ << "]: size of distortion wrong";
+         return;
       }
+
+      idx = 0;
+      for (   unsigned int col=0; col<(unsigned int)distortion.cols ; col++) {
+         for (unsigned int row=0; row<(unsigned int)distortion.rows ; row++)
+         {
+            settings.setArrayIndex(idx);
+            distortion.at<double>(row, col) = settings.value("value").toDouble();
+            idx++;
+         }
+      }
+
       settings.endArray();
       settings.endGroup();
 

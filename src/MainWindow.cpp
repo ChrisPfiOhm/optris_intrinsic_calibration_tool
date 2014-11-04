@@ -27,9 +27,9 @@ MainWindow::MainWindow(const char* configFile, QWidget* parent)
                                              cv::Size(9, 6),
                                              0.075);
 
-    _extrinsic_calibration.setPattern(_dialog->getPattern(),
-                                      cv::Size(9, 6),
-                                      0.075);
+//    _extrinsic_calibration.setPattern(_dialog->getPattern(),
+//                                      cv::Size(9, 6),
+//                                      0.075);
 
     this->connect(_ui->actionOptions,    SIGNAL(triggered()), this, SLOT(slot_calibrationSettings()));
     this->connect(_ui->_buttonCalibrate, SIGNAL(clicked()),   this, SLOT(slot_stereoCalibrate()));
@@ -47,10 +47,6 @@ MainWindow::MainWindow(const char* configFile, QWidget* parent)
     _ui->_view1->setIntrinsicCalibration(&_intrinsic_calibration_kinect);
     _ui->_view2->setIntrinsicCalibration(&_intrinsic_calibration_thermo);
 
-    std::cout << _openni_sensor->getIntrinsic() << std::endl;
-
-    std::cout <<
-
     _extrinsic_calibration.setDataSensor1(_openni_sensor->getIntrinsic(), _openni_sensor->getDistortion());
     _extrinsic_calibration.setDataSensor2(_thermo_sensor->getIntrinsic(), _thermo_sensor->getDistortion());
 }
@@ -64,15 +60,21 @@ void MainWindow::tick(void)
 {
    _ui->_view1->update();
    _ui->_view2->update();
+
+   if(_extrinsic_calibration.calibrated())
+   {
+      cv::Mat image1 = _openni_sensor->getVisualizationImage();
+      cv::Mat image2 = _thermo_sensor->getVisualizationImage();
+      _extrinsic_calibration.undistore(image1, image2);
+
+      _ui->_fusion->setMat(image1);
+   }
 }
 
 
 void MainWindow::slot_calibrationSettings(void)
 {
    _dialog->show();
-//   _intrinsic_calibration.setPattern(_dialog->getPattern(),
-//                                     cv::Size(1, 1),
-//                                     0.075);
 }
 
 void MainWindow::slot_stereoCalibrate(void)
@@ -82,7 +84,10 @@ void MainWindow::slot_stereoCalibrate(void)
 
 void MainWindow::slot_stereoCapture(void)
 {
-   _extrinsic_calibration.setImages(_openni_sensor->getCalibrationImage(),
+   _extrinsic_calibration.setImage1(_openni_sensor->getCalibrationImage());
+   _extrinsic_calibration.setImage2(_thermo_sensor->getCalibrationImage());
+
+   _extrinsic_calibration.capture(  _openni_sensor->getCalibrationImage(),
                                     _thermo_sensor->getCalibrationImage());
 }
 
