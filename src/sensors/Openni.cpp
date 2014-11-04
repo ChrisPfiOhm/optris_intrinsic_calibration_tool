@@ -18,8 +18,12 @@ Openni::Openni(void)
    boost::function<void(const boost::shared_ptr<openni_wrapper::Image>&)> g =
          boost::bind (&Openni::image_cb, this, _1);
 
-   _kinect->registerCallback(f);
-   _kinect->registerCallback(g);
+   boost::function<void(const boost::shared_ptr<openni_wrapper::IRImage>&)> h =
+         boost::bind (&Openni::ir_image_cb, this, _1);
+
+   _kinect->registerCallback(f);    // depth
+//   _kinect->registerCallback(g);    // rgb
+   _kinect->registerCallback(h);    // ir
    _kinect->start();
 }
 
@@ -30,11 +34,11 @@ Openni::~Openni(void)
 
 void Openni::grab(void)
 {
-//   cv::threshold(_depth, _bin, 140, 255, cv::THRESH_BINARY);
+   cv::threshold(_depth, _bin, 140, 255, cv::THRESH_BINARY);
 }
 
 
-// --> PIVATE
+// --> PRIVATE
 
 void Openni::depth_cb (const boost::shared_ptr<openni_wrapper::DepthImage>& img)
 {
@@ -52,6 +56,21 @@ void Openni::image_cb (const boost::shared_ptr<openni_wrapper::Image>& img)
 {
 
 }
+
+void Openni::ir_image_cb(const boost::shared_ptr<openni_wrapper::IRImage>& img)
+{
+   unsigned short* buffer = new unsigned short[img->getHeight() * img->getWidth()];
+
+   img->fillRaw(img->getWidth(), img->getHeight(), buffer);
+   cv::Mat map=cv::Mat(img->getHeight(), img->getWidth(), CV_16S, buffer);
+
+   map.convertTo(_ir, CV_8UC1);
+
+   _ir =  cv::Scalar::all(255) - _ir;
+
+   delete buffer;
+}
+
 
 
 void Openni::depthToCV8UC1(const cv::Mat& float_img, cv::Mat& mono8_img)

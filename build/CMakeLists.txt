@@ -1,7 +1,7 @@
 cmake_minimum_required (VERSION 2.6)
 
-set(SRC_DIR ${PROJECT_SOURCE_DIR}/src)
-set(FORM_DIR ${PROJECT_SOURCE_DIR}/forms)
+set(SRC_DIR  ${PROJECT_SOURCE_DIR}/../src)
+set(FORM_DIR ${PROJECT_SOURCE_DIR}/../forms)
 
 find_package(Qt4 REQUIRED)
 find_package(PCL REQUIRED)
@@ -19,6 +19,7 @@ set(MOC_HEADERS
     ${SRC_DIR}/OpenCvWidget.h
     ${SRC_DIR}/CalibrationViewWidget.h
     ${SRC_DIR}/sensors/ThermoCamThread.h
+    ${SRC_DIR}/sensors/ISensor.h
     ${SRC_DIR}/MainWindow.h
     ${SRC_DIR}/ConfigDialog.h
     ${SRC_DIR}/IntrinsicCalibration.h
@@ -30,10 +31,10 @@ set(FORMS
     ${FORM_DIR}/CalibrationViewWidget.ui
     )
 
-SET(GUI_RESOURCES ${PROJECT_SOURCE_DIR}/resources/resources.qrc)
+SET(GUI_RESOURCES ${PROJECT_SOURCE_DIR}/../resources/resources.qrc)
 
-QT4_WRAP_CPP(HEADERS_MOC ${MOC_HEADERS})
-QT4_WRAP_UI(FORMS_MOC    ${FORMS})
+QT4_WRAP_CPP(HEADERS_MOC    ${MOC_HEADERS})
+QT4_WRAP_UI(FORMS_MOC       ${FORMS})
 QT4_ADD_RESOURCES(RESOURCES ${GUI_RESOURCES})
 
 include_directories(${PROJECT_SOURCE_DIR}/build
@@ -43,7 +44,7 @@ include_directories(${PROJECT_SOURCE_DIR}/build
 
 link_directories(${OpenCV_LIBRARY_DIRS}
                  ${PCL_LIBRARY_DIRS}
-                 ${PROJECT_SOURCE_DIR}/lib
+                 ${PROJECT_SOURCE_DIR}/../lib
                  )
 
 add_executable(optris-calibration-tool

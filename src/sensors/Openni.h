@@ -41,7 +41,10 @@ public:
     * Function to get calibration image. Implementation from pure virtual method.
     */
    virtual const cv::Mat& getCalibrationImage(void)   { return _bin; }
-
+   /**
+    * Function to return image for visualization
+    * @return
+    */
    virtual const cv::Mat& getVisualizationImage(void) { return _depth; }
    /**
     * Function to return depth image as cv mat
@@ -70,6 +73,8 @@ private:
 
    void image_cb (const boost::shared_ptr<openni_wrapper::Image>& img);
 
+   void ir_image_cb(const boost::shared_ptr<openni_wrapper::IRImage>& img);
+
    cv::Mat generateBin(const cv::Mat depth);
 
    void depthToCV8UC1(const cv::Mat& float_img, cv::Mat& mono8_img);
@@ -80,6 +85,7 @@ private:
    cv::Mat  _bin;
    cv::Mat  _depth;
    cv::Mat  _color;
+   cv::Mat  _ir;
 
    float    _th;
 };

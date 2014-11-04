@@ -13,27 +13,46 @@ MainWindow::MainWindow(const char* configFile, QWidget* parent)
     : QMainWindow(parent),
       _ui(new Ui::MainWindow),
       _dialog(new ConfigDialog(QString(QDir::homePath() + "/workspace/optris_intrinsic_calibration_tool/config/pattern.ini"))),
-//      _openni_sensor(new Openni())
+      _openni_sensor(new Openni()),
       _thermo_sensor(new ThermoCam(configFile))
 //      _rgb_sensor(   new RGBCamera(0))
-//      _rgb2_sensor(  new RGBCamera(2))
+//      _rgb2_sensor(  new RGBCamera(1))
 {
     _ui->setupUi(this);
-//    _ui->_buttonCalibrate->setDisabled(true);
 
-    _intrinsic_calibration.setPattern(_dialog->getPattern(),
-                                      cv::Size(_dialog->getRows(), _dialog->getCols()),
+    _intrinsic_calibration_thermo.setPattern(_dialog->getPattern(),
+                                             cv::Size(9, 6),
+                                             0.075);
+    _intrinsic_calibration_kinect.setPattern(_dialog->getPattern(),
+                                             cv::Size(9, 6),
+                                             0.075);
+
+    _extrinsic_calibration.setPattern(_dialog->getPattern(),
+                                      cv::Size(9, 6),
                                       0.075);
-//    _extrinsic_calibration.setPattern(_dialog->getPattern(),
-//                                      cv::Size(_dialog->getRows(), _dialog->getCols()),
-//                                      _dialog->getPointDistance());
 
     this->connect(_ui->actionOptions,    SIGNAL(triggered()), this, SLOT(slot_calibrationSettings()));
+    this->connect(_ui->_buttonCalibrate, SIGNAL(clicked()),   this, SLOT(slot_stereoCalibrate()));
+    this->connect(_ui->_buttonCapture,   SIGNAL(clicked()),   this, SLOT(slot_stereoCapture()));
     this->connect(&_timer,               SIGNAL(timeout()),   this, SLOT(tick()));
-    this->connect(_ui->_buttonCalibrate, SIGNAL(clicked()),   this, SLOT(calibrate()));
-    this->connect(_ui->_buttonCapture,   SIGNAL(clicked()),   &_intrinsic_calibration, SLOT(slot_capture()));
 
     _timer.start(33);
+
+    _thermo_sensor->loadConfig("/home/chris/workspace/thermo_intrinsic.ini");
+    _openni_sensor->loadConfig("/home/chris/workspace/kinect_intrinsic.ini");
+
+    _ui->_view1->setSensor(_openni_sensor, QString("Kinect"));
+    _ui->_view2->setSensor(_thermo_sensor, QString("Thermo"));
+
+    _ui->_view1->setIntrinsicCalibration(&_intrinsic_calibration_kinect);
+    _ui->_view2->setIntrinsicCalibration(&_intrinsic_calibration_thermo);
+
+    std::cout << _openni_sensor->getIntrinsic() << std::endl;
+
+    std::cout <<
+
+    _extrinsic_calibration.setDataSensor1(_openni_sensor->getIntrinsic(), _openni_sensor->getDistortion());
+    _extrinsic_calibration.setDataSensor2(_thermo_sensor->getIntrinsic(), _thermo_sensor->getDistortion());
 }
 
 MainWindow::~MainWindow(void)
@@ -43,56 +62,27 @@ MainWindow::~MainWindow(void)
 
 void MainWindow::tick(void)
 {
-   static unsigned int i=0;
-
-   // grab sensors
-    _thermo_sensor->grab();
-//    _openni_sensor->grab();
-//    _rgb_sensor->grab();
-//    _rgb2_sensor->grab();
-
-     cv::Mat image(     _thermo_sensor->getCalibrationImage());
-     cv::Mat colorImage(_thermo_sensor->getVisualizationImage());
-
-//     if(i%10 == 0)
-     {
-                _intrinsic_calibration.setImage(image, colorImage);
-//        _extrinsic_calibration.setImages(image, image2);
-     }
-
-     i++;
-
-     _ui->_thermoView->setMat(image);
-     _ui->_depthView->setMat( colorImage);
-
-
-    // update visualization
-//    _ui->_thermoView->setMat(   _thermo_sensor->getVisualizationImage());
-    if(_intrinsic_calibration.calibrated()) _ui->_thresholdView->setMat(_intrinsic_calibration.getUndistored(colorImage));
-    else                                    _ui->_thresholdView->setMat(colorImage);
-//
-//    _ui->_depthView->setMat(_rgb2_sensor->getVisualizationImage());
-
-
-//    if(_extrinsic_calibration.getNrOfValids() >20)
-//       _ui->_buttonCalibrate->setDisabled(false);
-}
-
-void MainWindow::calibrate(void)
-{
-   _intrinsic_calibration.calibrate();
-//   _extrinsic_calibration.calibrate();
-//   std::cout << _intrinsic_calibration.getIntrinsic()  << std::endl;
-//   std::cout << _intrinsic_calibration.getDistortion() << std::endl;
+   _ui->_view1->update();
+   _ui->_view2->update();
 }
 
 
 void MainWindow::slot_calibrationSettings(void)
 {
    _dialog->show();
-   _intrinsic_calibration.setPattern(_dialog->getPattern(),
-                                     cv::Size(1, 1),
-                                     0.06);
+//   _intrinsic_calibration.setPattern(_dialog->getPattern(),
+//                                     cv::Size(1, 1),
+//                                     0.075);
+}
 
+void MainWindow::slot_stereoCalibrate(void)
+{
+   _extrinsic_calibration.calibrate();
+}
+
+void MainWindow::slot_stereoCapture(void)
+{
+   _extrinsic_calibration.setImages(_openni_sensor->getCalibrationImage(),
+                                    _thermo_sensor->getCalibrationImage());
 }
 

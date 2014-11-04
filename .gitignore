@@ -5,7 +5,8 @@ Makefile
 CMakeCache*
 .cproject
 .project
-ui_*
+src/ui_*.h
+ui_*.h
 CMakeFiles/
 *~ 
 

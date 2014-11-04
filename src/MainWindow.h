@@ -57,13 +57,14 @@ private slots:
     */
     void tick(void);
     /**
-     * Slot to activate calibration
-     */
-    void calibrate(void);
-    /**
      * Function to call config dialog
      */
     void slot_calibrationSettings(void);
+
+    void slot_stereoCalibrate(void);
+
+    void slot_stereoCapture(void);
+
 
 private:
     Ui::MainWindow*                        _ui;
@@ -75,7 +76,8 @@ private:
     ISensor*                               _rgb2_sensor;
 
 
-    IntrinsicCalibration                   _intrinsic_calibration;
+    IntrinsicCalibration                   _intrinsic_calibration_thermo;
+    IntrinsicCalibration                   _intrinsic_calibration_kinect;
     ExtrinsicCalibration                   _extrinsic_calibration;
 
     ConfigDialog*                          _dialog;

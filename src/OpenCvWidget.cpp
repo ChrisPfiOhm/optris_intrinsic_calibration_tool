@@ -11,7 +11,6 @@ OpenCvWidget::~OpenCvWidget(void)
    delete _image;
    _mutex.unlock();
 
-
    QSizePolicy qsp(QSizePolicy::Preferred,
                    QSizePolicy::Preferred);
    qsp.setHeightForWidth(true);
@@ -52,24 +51,21 @@ void OpenCvWidget::setMat(const cv::Mat& mat)
     }
 
     // 16-bits depth image
-    else if (_mat.type() == CV_16UC1)
-    {
+    else if (_mat.type() == CV_16UC1) {
         const unsigned char* qImageBuffer = static_cast<const unsigned char*>(_mat.data);
         _image = new QImage(qImageBuffer, _mat.cols, _mat.rows, _mat.step, QImage::Format_RGB16);
     }
-    else
-    {
+    else {
         qDebug() << "ERROR: Mat could not be converted to QImage.";
         _mutex.unlock();
         return;
     }
 
-    this->setMinimumSize(_image->size());
+//    this->setMinimumSize(_image->size()*0.6);
     QObject* sender = this->sender();
 
     // if this method is called from a other thread send just a event to queue.
-    if (sender && sender->thread() != this->thread())
-    {
+    if (sender && sender->thread() != this->thread()) {
         QEvent event(QEvent::UpdateRequest);
         QCoreApplication::sendEvent(this, &event);
         _mutex.unlock();
@@ -80,18 +76,34 @@ void OpenCvWidget::setMat(const cv::Mat& mat)
     _mutex.unlock();
 }
 
+void OpenCvWidget::setSize(QSize s)
+{
+   _scaledSize = s;
+   this->setMinimumSize(s);
+}
+
 void OpenCvWidget::paintEvent(QPaintEvent*)
 {
     _mutex.lock();
 
-    if (!_image)
-    {
+    if (!_image) {
         _mutex.unlock();
         return;
     }
 
+    QImage scaled = _image->scaled(_scaledSize);
     QPainter painter(this);
-    painter.drawImage(this->rect(), *_image, _image->rect());
+    painter.drawImage(this->rect(), scaled, this->rect());
 
     _mutex.unlock();
+
+}
+
+void OpenCvWidget::resizeImage(void)
+{
+//   resizeImage() {
+//       QSize pixSize = label->pixmap()->size();
+//       pixSize.scale(size(), Qt::KeepAspectRatio);
+//       label->setFixedSize(pixSize);
+//   }
 }

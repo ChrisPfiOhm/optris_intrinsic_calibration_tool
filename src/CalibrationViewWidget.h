@@ -8,9 +8,14 @@
 #ifndef SRC_CALIBRATIONVIEWWIDGET_H_
 #define SRC_CALIBRATIONVIEWWIDGET_H_
 
+// qt includes
 #include <QWidget>
+
+// opencv includes
 #include <opencv2/core/core.hpp>
 
+
+// calibration includes
 #include <sensors/ISensor.h>
 #include "IntrinsicCalibration.h"
 
@@ -55,15 +60,22 @@ public:
     * Function to set sensor
     * @param sensor
     */
-   void setSensor(ISensor* sensor);
+   void setSensor(ISensor* sensor, QString name="");
    /**
     * Function to set intrinsic calibration
     * @param intrinsic
     */
    void setIntrinsicCalibration(IntrinsicCalibration* intrinsic);
 
+
 public slots:
+   /**
+    * Slot to update visualization
+    */
    void update(void);
+
+private slots:
+   void slot_calibrate(void);
 
 private:
    ISensor*                   _sensor;

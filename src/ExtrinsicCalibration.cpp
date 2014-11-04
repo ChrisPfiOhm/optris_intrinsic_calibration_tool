@@ -15,8 +15,9 @@
 
 ExtrinsicCalibration::ExtrinsicCalibration(void)
 :  _valid(0),
-   _pattern_dist(0.06),
-   _pattern_type(ConfigDialog::SymCircles)
+   _pattern_dist(0.075),
+   _pattern_type(ConfigDialog::SymCircles),
+   _pattern_size(9, 6)
 {
 
 }
@@ -34,27 +35,37 @@ bool ExtrinsicCalibration::setImages(cv::Mat image1Bin, cv::Mat image2Bin)
 
    _image_size = image1Bin.size();
 
+   // set up the parameters (check the defaults in opencv's code in blobdetector.cpp)
+   cv::SimpleBlobDetector::Params params;
+   params.minDistBetweenBlobs = 5.0f;
+   params.filterByInertia     = true;
+   params.filterByConvexity   = false;
+   params.filterByColor       = true;
+   params.filterByCircularity = false;
+   params.filterByArea        = true;
+   params.minArea             = 30.0f;
+   params.maxArea             = 3000.0f;
+   params.maxInertiaRatio     = 30.0f;
+
+   cv::Ptr<cv::FeatureDetector> _blob_detector = new cv::SimpleBlobDetector(params);
+   _blob_detector->create("SimpleBlob");
 
    /*
     * Find circles for first image
     */
-   if (cv::findCirclesGrid(image1Bin, _pattern_size, centers1, (cv::CALIB_CB_SYMMETRIC_GRID) |
-                                                                cv::CALIB_CB_ADAPTIVE_THRESH |
-                                                                cv::CALIB_CB_FAST_CHECK))
-   {
+   if (cv::findCirclesGrid(image1Bin, _pattern_size, centers1,
+      (cv::CALIB_CB_SYMMETRIC_GRID) | cv::CALIB_CB_ADAPTIVE_THRESH), _blob_detector){
        cv::drawChessboardCorners(image1Bin, _pattern_size, cv::Mat(centers1), true);
    }
-   else {
+   else{
        centers1.clear();
    }
 
    /*
     * Find circles for second image
     */
-   if (cv::findCirclesGrid(image2Bin, _pattern_size, centers2, (cv::CALIB_CB_SYMMETRIC_GRID) |
-                                                                cv::CALIB_CB_ADAPTIVE_THRESH |
-                                                                cv::CALIB_CB_FAST_CHECK))
-   {
+   if (cv::findCirclesGrid(image2Bin, _pattern_size, centers2,
+      (cv::CALIB_CB_SYMMETRIC_GRID) | cv::CALIB_CB_ADAPTIVE_THRESH), _blob_detector) {
        cv::drawChessboardCorners(image2Bin, _pattern_size, cv::Mat(centers2), true);
    }
    else {
@@ -62,15 +73,30 @@ bool ExtrinsicCalibration::setImages(cv::Mat image1Bin, cv::Mat image2Bin)
    }
 
    // push back points for calibration
-   if((centers1.size() > 0) && (centers2.size() >0)) {
+   if((centers1.size() > 0) && (centers2.size() >0))
+   {
+      if(centers1.size() != centers2.size()) {
+//         qDebug() << "[" << __PRETTY_FUNCTION__ << "]: different size in blob detection. ";
+//         qDebug() << "[" << __PRETTY_FUNCTION__ << "]: Size 1: " << centers1.size() <<
+//                                                     " Size2:  " << centers2.size();
+         return false;
+      }
+
+      if(centers1.size() != _pattern_size.width*_pattern_size.height) {
+//         qDebug() << "[" << __PRETTY_FUNCTION__ << "]: wrong size in blob detection. ";
+         return false;
+      }
+
+      qDebug() << "[" << __PRETTY_FUNCTION__ << "]: Captured " << ++_valid  << " frames";
+
+
       _points1.push_back(centers1);
       _points2.push_back(centers2);
-      qDebug() << _valid++;
+
       return true;
    }
-   else {
-      return false;
-   }
+
+   return false;
 }
 
 void ExtrinsicCalibration::setPattern(ConfigDialog::Pattern type, cv::Size size, float dist)
@@ -85,10 +111,9 @@ bool ExtrinsicCalibration::calibrate(void)
 {
    std::vector<std::vector<cv::Point3f> > coords(1);
 
-   _pattern_dist = 0.06;
+   _pattern_dist = 0.075;
 
-   qDebug() << "h1";
-
+   // generate coordinates from pattern
    for (    int row = 0; row < _pattern_size.height; row++) {
        for (int col = 0; col < _pattern_size.width;  col++)
        {
@@ -98,30 +123,47 @@ bool ExtrinsicCalibration::calibrate(void)
        }
    }
 
-   qDebug() << "h2";
+   coords.resize(_points2.size(), coords[0]);
 
-   coords.resize(_points1.size(), coords[0]);
+//   std::cout << _points1.size()     << std::endl;
+//   std::cout << _points2.size()     << std::endl;
+//   std::cout << coords.size()       << std::endl;
 
-   cv::Mat E, F;
-   double rms = cv::stereoCalibrate(coords[0], _points1[0], _points2[0],
-                   _intrinsic1, _distortion1,
-                   _intrinsic2, _distortion2,
-                   _image_size,
-                   _R, _T,
-                   E, F,
-                   cv::TermCriteria(CV_TERMCRIT_ITER + CV_TERMCRIT_EPS, 100, 1e-5));
+   cv::Mat E, F, R, T;
 
-   qDebug() << "h3";
-//                   TermCriteria(cv::CV_TERMCRIT_ITER+CV_TERMCRIT_EPS, 100, 1e-5),
-//                   CV_CALIB_FIX_ASPECT_RATIO +
-//                   //CV_CALIB_ZERO_TANGENT_DIST +
-//                   CV_CALIB_SAME_FOCAL_LENGTH +
-//                   CV_CALIB_RATIONAL_MODEL +
-//                   //CV_CALIB_FIX_K3);
-//                   //CV_CALIB_FIX_K2);
-//                   CV_CALIB_FIX_K3 + CV_CALIB_FIX_K4 + CV_CALIB_FIX_K5);
-                   //CV_CALIB_FIX_K1 + CV_CALIB_FIX_K2 + CV_CALIB_FIX_K3 + CV_CALIB_FIX_K4 + CV_CALIB_FIX_K5);
-       std::cout << "done with RMS error=" << rms << std::endl;
+   cv::Mat cameraMatrix[2], distCoeffs[2];
+   cameraMatrix[0] = cv::Mat::eye( 3, 3, CV_64F );
+   cameraMatrix[1] = cv::Mat::eye( 3, 3, CV_64F );
+
+   std::cout << _intrinsic1  << std::endl;
+   std::cout << _distortion2 << std::endl;
+   std::cout << _intrinsic2  << std::endl;
+   std::cout << _distortion2 << std::endl;
+
+   double rms = cv::stereoCalibrate( coords,
+                                     _points1, _points2,
+                                     cameraMatrix[0], distCoeffs[0],
+                                     cameraMatrix[1], distCoeffs[1],
+                                     _image_size, R, T, E, F,
+                                     cv::TermCriteria(
+                                         CV_TERMCRIT_ITER+CV_TERMCRIT_EPS,
+                                         300, 1e-5),
+                                     CV_CALIB_FIX_ASPECT_RATIO +
+//                                     CV_CALIB_ZERO_TANGENT_DIST +
+//                                     CV_CALIB_FIX_INTRINSIC +
+                                     CV_CALIB_RATIONAL_MODEL +
+                                     CV_CALIB_FIX_K3 +
+                                     CV_CALIB_FIX_K4 +
+                                     CV_CALIB_FIX_K5 );
+
+    std::cout << "done with RMS error=" << rms             << std::endl;
+    std::cout << "Translation T: "      << T               << std::endl;
+    std::cout << "Rotation R:    "      << R               << std::endl;
+//    std::cout << "E:             "      << E               << std::endl;
+//    std::cout << "F:             "      << F               << std::endl;
+    std::cout << "Intrinsic 1    "      << cameraMatrix[0] << std::endl;
+    std::cout << "Intrinsic 2    "      << cameraMatrix[1] << std::endl;
+
 
     return true;
 }

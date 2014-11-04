@@ -51,13 +51,21 @@ public:
     * @param intrinsic
     * @param extrinsic
     */
-   void setDataSensor1(const cv::Mat intrinsic, const cv::Mat distortion);
+   void setDataSensor1(const cv::Mat& intrinsic, const cv::Mat& distortion)
+   {
+      _intrinsic1  = intrinsic;
+      _distortion1 = distortion;
+   }
    /**
     * Function to set data of sensor 2
     * @param intrinsic
     * @param extrinsic
     */
-   void setDataSensor2(const cv::Mat intrinsic, const cv::Mat distortion);
+   void setDataSensor2(const cv::Mat& intrinsic, const cv::Mat& distortion)
+   {
+      _intrinsic2  = intrinsic;
+      _distortion2 = distortion;
+   }
 
    // GETTERS
    /**

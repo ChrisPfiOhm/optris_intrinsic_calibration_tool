@@ -4,7 +4,9 @@
 
 ThermoCam::ThermoCam(const char* configFile)
     : _cam(new ThermoCamThread(configFile)),
-      _bin_th(30.0)
+      _bin_th(18.0),
+      _temperature(NULL),
+      _image(NULL)
 {
 
 }
@@ -35,7 +37,9 @@ void ThermoCam::grab(void)
 
 cv::Mat ThermoCam::generateBin(const cv::Mat temperature)
 {
-   const unsigned short tempMin = static_cast<unsigned short>(_bin_th* 10);
+   const unsigned short tempMin = static_cast<unsigned short>(30* 10);
+   const unsigned short tempMax = static_cast<unsigned short>(30* 10);
+
 
    cv::Mat tempImage(temperature.rows, temperature.cols, CV_8UC1);
 
@@ -45,8 +49,7 @@ cv::Mat ThermoCam::generateBin(const cv::Mat temperature)
        unsigned char* dataTempImage = tempImage.ptr(row);
 
        for (unsigned int col = 0; col < temperature.cols; col++, dataTemperature++) {
-           const unsigned short temp = *dataTemperature - 1000;
-
+           const unsigned short temp = (*dataTemperature - 1000);
            if (temp < tempMin) *dataTempImage++ = 0xff;
            else                *dataTempImage++ = 0x00;
        }

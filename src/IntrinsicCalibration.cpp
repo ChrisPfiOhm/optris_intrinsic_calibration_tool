@@ -21,6 +21,7 @@
 IntrinsicCalibration::IntrinsicCalibration(void)
 :  QObject(0),
    _pattern_type(ConfigDialog::SymCircles),
+   _pattern_size(cv::Size(9, 6)),
    _valid(0),
    _pattern_dist(0.075),
    _calibration_flag(false),
@@ -43,20 +44,22 @@ bool IntrinsicCalibration::setImage(cv::Mat binaryImage, cv::Mat colorImage)
 
    // set up the parameters (check the defaults in opencv's code in blobdetector.cpp)
    cv::SimpleBlobDetector::Params params;
-   params.minDistBetweenBlobs = 2.0f;
+   params.minDistBetweenBlobs = 5.0f;
    params.filterByInertia     = true;
    params.filterByConvexity   = false;
    params.filterByColor       = true;
    params.filterByCircularity = false;
    params.filterByArea        = true;
-   params.minArea             = 5.0f;
-   params.maxArea             = 10000.0f;
+   params.minArea             = 30.0f;
+   params.maxArea             = 3000.0f;
+   params.maxInertiaRatio     = 30.0f;
 
    cv::Ptr<cv::FeatureDetector> _blob_detector = new cv::SimpleBlobDetector(params);
    _blob_detector->create("SimpleBlob");
 
 
    if (cv::findCirclesGrid(binaryImage, _pattern_size, centers, (cv::CALIB_CB_SYMMETRIC_GRID |
+                                                                 cv::CALIB_CB_FAST_CHECK     |
                                                                  cv::CALIB_CB_ADAPTIVE_THRESH),
                                                                  _blob_detector)){
        cv::drawChessboardCorners(colorImage, _pattern_size, cv::Mat(centers), true);
@@ -67,6 +70,7 @@ bool IntrinsicCalibration::setImage(cv::Mat binaryImage, cv::Mat colorImage)
 
    if(_capture)
    {
+      qDebug() << __PRETTY_FUNCTION__;
       _capture = false;
       // push back points for calibration
       if(centers.size() > 0) {
@@ -75,21 +79,30 @@ bool IntrinsicCalibration::setImage(cv::Mat binaryImage, cv::Mat colorImage)
          return true;
       }
    }
+
    return false;
 }
 
 
 void IntrinsicCalibration::setPattern(ConfigDialog::Pattern type, cv::Size size, float dist)
 {
-   _pattern_type = type;
-   _pattern_size = size;
-   _pattern_dist = dist;
+   _pattern_type     = type;
+   _pattern_size     = size;
+   _pattern_dist     = dist;
 }
 
 
-
-bool IntrinsicCalibration::calibrate(void)
+void IntrinsicCalibration::setCalibration(const cv::Mat& intrinsic, const cv::Mat& distortion)
 {
+   _intrinsic        = intrinsic;
+   _distortion       = distortion;
+   _calibration_flag = true;
+}
+
+
+bool IntrinsicCalibration::slot_calibrate(void)
+{
+   qDebug() << __PRETTY_FUNCTION__;
    std::vector<std::vector<cv::Point3f> > coords(1);
 
    _pattern_dist = 0.075;
@@ -117,6 +130,12 @@ bool IntrinsicCalibration::calibrate(void)
    intrinsic.copyTo( _intrinsic);
    distortion.copyTo(_distortion);
    _calibration_flag = true;
+
+   std::cout << _intrinsic  << std::endl;
+   std::cout << _distortion << std::endl;
+
+   this->saveToFile();
+
    return true;
 }
 
@@ -162,7 +181,7 @@ void IntrinsicCalibration::saveToFile(void)
    if (_intrinsic.empty() || _distortion.empty()) {
        qDebug() << __PRETTY_FUNCTION__ << ": calibration matrix is empty."; return;
    }
-   cv::FileStorage fs("calibration.xml", cv::FileStorage::WRITE);
+   cv::FileStorage fs("/tmp/calibration.xml", cv::FileStorage::WRITE);
    fs << "intrinsic"  << _intrinsic;
    fs << "distortion" << _distortion;
 }
@@ -170,6 +189,7 @@ void IntrinsicCalibration::saveToFile(void)
 
 void IntrinsicCalibration::slot_capture(void)
 {
+   qDebug() << __PRETTY_FUNCTION__;
    _capture = true;
 }
 

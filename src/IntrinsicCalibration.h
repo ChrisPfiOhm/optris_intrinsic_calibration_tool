@@ -38,6 +38,7 @@ public:
     */
    virtual ~IntrinsicCalibration(void);
 
+
    // SETTERS
    /**
     * Function to set image for calibration. If corners are found the image is returned withing drawn corners
@@ -51,18 +52,24 @@ public:
     * @param size
     */
    void setPattern(ConfigDialog::Pattern type, cv::Size size, const float dist);
+   /**
+    * Function to set intrinsic
+    * @param intrinsic
+    */
+   void setCalibration(const cv::Mat& intrinsic, const cv::Mat& distortion);
+
 
    // GETTERS
    /**
     * Function to return intrinsic calibration matrix
     * @return  intrinsic matrix
     */
-   cv::Mat getIntrinsic(void) const   { return _intrinsic;  }
+   cv::Mat getIntrinsic(void) const              { return _intrinsic;  }
    /**
     * Function to get distrotion of camera
     * @return
     */
-   cv::Mat getDistortion(void) const  { return _distortion; }
+   cv::Mat getDistortion(void) const             { return _distortion; }
    /**
     * Function to return number of valid images for calibration
     * @return
@@ -74,13 +81,8 @@ public:
     */
    const cv::Mat getUndistored(const cv::Mat image);
 
-   // OTHERS
-   /**
-    * Function to call for calibration
-    * @return     true if everything is ok
-    */
-   bool calibrate(void);
 
+   // OTHERS
    /**
     * Function to return true if image is calibrated
     */
@@ -92,6 +94,11 @@ public:
    void saveToFile(void);
 
 public slots:
+   /**
+    * Function to call for calibration
+    * @return     true if everything is ok
+    */
+   bool slot_calibrate(void);
    /**
     * Slot to capture frame
     */
