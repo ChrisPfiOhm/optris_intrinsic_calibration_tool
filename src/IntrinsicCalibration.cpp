@@ -18,6 +18,7 @@
 #include <QTextStream>
 
 
+
 IntrinsicCalibration::IntrinsicCalibration(void)
 :  QObject(0),
    _pattern_type(ConfigDialog::SymCircles),

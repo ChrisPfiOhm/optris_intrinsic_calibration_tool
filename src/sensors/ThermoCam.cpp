@@ -37,8 +37,8 @@ void ThermoCam::grab(void)
 
 cv::Mat ThermoCam::generateBin(const cv::Mat temperature)
 {
-   const unsigned short tempMin = static_cast<unsigned short>(30* 10);
-   const unsigned short tempMax = static_cast<unsigned short>(30* 10);
+   const unsigned short tempMin = static_cast<unsigned short>(25* 10);
+   const unsigned short tempMax = static_cast<unsigned short>(25* 10);
 
    cv::Mat tempImage(temperature.rows, temperature.cols, CV_8UC1);
 

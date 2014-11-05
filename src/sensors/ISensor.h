@@ -101,8 +101,6 @@ public:
 
       _intrinsic  = intrinsic;
       _distortion = distortion;
-
-      qDebug() << "[" <<__PRETTY_FUNCTION__ << "]: loaded settings";
    }
 
 

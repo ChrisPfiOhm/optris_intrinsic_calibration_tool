@@ -53,7 +53,11 @@ MainWindow::MainWindow(const char* configFile, QWidget* parent)
 
 MainWindow::~MainWindow(void)
 {
-   // nothing to do here
+   delete _openni_sensor;
+   delete _thermo_sensor;
+
+   delete _rgb_sensor;
+   delete _rgb2_sensor;
 }
 
 void MainWindow::tick(void)

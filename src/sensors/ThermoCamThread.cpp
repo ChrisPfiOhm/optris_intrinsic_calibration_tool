@@ -1,7 +1,11 @@
-#include <sensors/ImageBuilder.h>
-#include <sensors/Imager.h>
+//#include <sensors/ImageBuilder.h>
+//#include <sensors/Imager.h>
+
+#include <libirimager/ImageBuilder.h>
+#include <libirimager/IRImager.h>
+
 #include <sensors/ThermoCamThread.h>
-#include "Imager.h"
+
 #include <QByteArray>
 #include <QDebug>
 
@@ -12,7 +16,7 @@ unsigned char*        _bufferShow = NULL;
 unsigned short*       _bufferT    = NULL;
 optris::ImageBuilder* _iBuilder   = NULL;
 
-void callbackImager(unsigned short* image, unsigned int w, unsigned int h)
+void callbackImager(unsigned short* image, unsigned int w, unsigned int h, long long timestamp)
 {
    if(!_bufferShow) _bufferShow = new unsigned char[w*h* 3];
 
@@ -24,7 +28,7 @@ void callbackImager(unsigned short* image, unsigned int w, unsigned int h)
 
 ThermoCamThread::ThermoCamThread(const char* configFile, QObject* parent)
     : QThread(parent),
-      _imager(new optris::PIImager(configFile)),
+      _imager(new optris::IRImager(configFile)),
       _bufferRaw(0),
       _image(CountBanks),
       _temperature(CountBanks),
@@ -53,8 +57,8 @@ ThermoCamThread::ThermoCamThread(const char* configFile, QObject* parent)
 
     _image[BankA].create(      _imager->getHeight(), _imager->getWidth(), CV_8UC3);
     _image[BankB].create(      _imager->getHeight(), _imager->getWidth(), CV_8UC3);
-    _temperature[BankA].create(_imager->getHeight(), _imager->getWidth(),    CV_16UC1);
-    _temperature[BankB].create(_imager->getHeight(), _imager->getWidth(),    CV_16UC1);
+    _temperature[BankA].create(_imager->getHeight(), _imager->getWidth(), CV_16UC1);
+    _temperature[BankB].create(_imager->getHeight(), _imager->getWidth(), CV_16UC1);
 
 
 

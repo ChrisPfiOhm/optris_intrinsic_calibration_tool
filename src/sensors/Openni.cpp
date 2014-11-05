@@ -8,29 +8,33 @@
 #include <sensors/Openni.h>
 
 Openni::Openni(void)
-:  _kinect(new pcl::OpenNIGrabber()),
-   _th(1.0)
+: _th(1.0)
 {
+   system("pkill XnSensorServer");
+
+   _kinect = new pcl::OpenNIGrabber();
 
    boost::function<void(const boost::shared_ptr<openni_wrapper::DepthImage>&)> f =
          boost::bind (&Openni::depth_cb, this, _1);
 
-   boost::function<void(const boost::shared_ptr<openni_wrapper::Image>&)> g =
+   boost::function<void(const boost::shared_ptr<openni_wrapper::Image>&)> g   =
          boost::bind (&Openni::image_cb, this, _1);
 
    boost::function<void(const boost::shared_ptr<openni_wrapper::IRImage>&)> h =
          boost::bind (&Openni::ir_image_cb, this, _1);
 
-   _kinect->registerCallback(f);    // depth
+   _kinect->registerCallback(f);      // depth
 //   _kinect->registerCallback(g);    // rgb
-   _kinect->registerCallback(h);    // ir
+   _kinect->registerCallback(h);      // ir
    _kinect->start();
 }
+
 
 Openni::~Openni(void)
 {
    _kinect->stop();
 }
+
 
 void Openni::grab(void)
 {
@@ -52,10 +56,12 @@ void Openni::depth_cb (const boost::shared_ptr<openni_wrapper::DepthImage>& img)
   delete buffer;
 }
 
+
 void Openni::image_cb (const boost::shared_ptr<openni_wrapper::Image>& img)
 {
 
 }
+
 
 void Openni::ir_image_cb(const boost::shared_ptr<openni_wrapper::IRImage>& img)
 {
@@ -72,7 +78,6 @@ void Openni::ir_image_cb(const boost::shared_ptr<openni_wrapper::IRImage>& img)
 }
 
 
-
 void Openni::depthToCV8UC1(const cv::Mat& float_img, cv::Mat& mono8_img)
 {
    if(mono8_img.rows != float_img.rows || mono8_img.cols != float_img.cols) {
@@ -82,13 +87,4 @@ void Openni::depthToCV8UC1(const cv::Mat& float_img, cv::Mat& mono8_img)
    double minVal, maxVal;
    minMaxLoc(float_img, &minVal, &maxVal);
    cv::convertScaleAbs(float_img, mono8_img, 255);
-
-//   for(    int row = 0; row < float_img.rows; row++){
-//       for(int col = 0; col < float_img.cols; col++) {
-//           if (float_img.at<double>(row, col) <= 0.1)
-//              mono8_img.at<bool>(row, col) = false;
-//           else
-//              mono8_img.at<bool>(row, col) = true;
-//       }
-//   }
 }

@@ -9,8 +9,8 @@
 
 #include <opencv2/opencv.hpp>
 
-#include <sensors/ImageBuilder.h>
-#include <sensors/PIImager.h>
+#include <libirimager/ImageBuilder.h>
+#include <libirimager/IRImager.h>
 
 
 class ThermoCamThread : public QThread
@@ -46,7 +46,7 @@ private:
     void copyToImage(void);
     void switching(void);
 
-    optris::PIImager*   _imager;
+    optris::IRImager*   _imager;
     unsigned char*      _bufferRaw;
     QTimer              _timer;
     QVector<cv::Mat>    _image;

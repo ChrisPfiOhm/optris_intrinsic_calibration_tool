@@ -69,7 +69,7 @@ target_link_libraries(optris-calibration-tool
                       ${QT_LIBRARIES}
                       ${OpenCV_LIBS}
                       ${PCL_LIBRARIES}
-                      PIImager
-                      ImageProcessing
+                      irimager 
+                      irimageprocessing
                       udev
                       )
