@@ -69,6 +69,7 @@ void MainWindow::tick(void)
    {
       cv::Mat image1 = _openni_sensor->getVisualizationImage();
       cv::Mat image2 = _thermo_sensor->getVisualizationImage();
+
       _extrinsic_calibration.undistore(image1, image2);
 
       _ui->_fusion->setMat(image1);

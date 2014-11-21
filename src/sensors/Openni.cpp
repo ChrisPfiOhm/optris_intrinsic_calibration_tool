@@ -10,17 +10,21 @@
 Openni::Openni(void)
 : _th(1.0)
 {
+   /*
+    * Kill possibly runnint XnSensorServer
+    * if
+    */
    system("pkill XnSensorServer");
 
    _kinect = new pcl::OpenNIGrabber();
 
    boost::function<void(const boost::shared_ptr<openni_wrapper::DepthImage>&)> f =
-         boost::bind (&Openni::depth_cb, this, _1);
+         boost::bind (&Openni::depth_cb,    this, _1);
 
-   boost::function<void(const boost::shared_ptr<openni_wrapper::Image>&)> g   =
-         boost::bind (&Openni::image_cb, this, _1);
+   boost::function<void(const boost::shared_ptr<openni_wrapper::Image>&)> g      =
+         boost::bind (&Openni::image_cb,    this, _1);
 
-   boost::function<void(const boost::shared_ptr<openni_wrapper::IRImage>&)> h =
+   boost::function<void(const boost::shared_ptr<openni_wrapper::IRImage>&)> h    =
          boost::bind (&Openni::ir_image_cb, this, _1);
 
    _kinect->registerCallback(f);      // depth

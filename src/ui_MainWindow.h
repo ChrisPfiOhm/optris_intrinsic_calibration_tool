@@ -24,6 +24,7 @@
 #include <QtGui/QStatusBar>
 #include <QtGui/QVBoxLayout>
 #include <QtGui/QWidget>
+#include "CalibrationViewWidget.h"
 #include "OpenCvWidget.h"
 
 QT_BEGIN_NAMESPACE
@@ -36,15 +37,14 @@ public:
     QAction *actionUndistor;
     QWidget *centralwidget;
     QHBoxLayout *horizontalLayout;
-    QVBoxLayout *verticalLayout_2;
-    OpenCvWidget *_thermoView;
-    OpenCvWidget *_thresholdView;
-    OpenCvWidget *_depthView;
+    CalibrationViewWidget *_view1;
+    CalibrationViewWidget *_view2;
     QSpacerItem *horizontalSpacer;
     QVBoxLayout *verticalLayout;
     QPushButton *_buttonCalibrate;
     QPushButton *_buttonCapture;
     QSpacerItem *verticalSpacer;
+    OpenCvWidget *_fusion;
     QLabel *_labelResult;
     QMenuBar *menubar;
     QMenu *menuSettings;
@@ -66,27 +66,17 @@ public:
         centralwidget->setObjectName(QString::fromUtf8("centralwidget"));
         horizontalLayout = new QHBoxLayout(centralwidget);
         horizontalLayout->setObjectName(QString::fromUtf8("horizontalLayout"));
-        verticalLayout_2 = new QVBoxLayout();
-        verticalLayout_2->setObjectName(QString::fromUtf8("verticalLayout_2"));
-        _thermoView = new OpenCvWidget(centralwidget);
-        _thermoView->setObjectName(QString::fromUtf8("_thermoView"));
+        _view1 = new CalibrationViewWidget(centralwidget);
+        _view1->setObjectName(QString::fromUtf8("_view1"));
 
-        verticalLayout_2->addWidget(_thermoView);
+        horizontalLayout->addWidget(_view1);
 
-        _thresholdView = new OpenCvWidget(centralwidget);
-        _thresholdView->setObjectName(QString::fromUtf8("_thresholdView"));
+        _view2 = new CalibrationViewWidget(centralwidget);
+        _view2->setObjectName(QString::fromUtf8("_view2"));
 
-        verticalLayout_2->addWidget(_thresholdView);
+        horizontalLayout->addWidget(_view2);
 
-        _depthView = new OpenCvWidget(centralwidget);
-        _depthView->setObjectName(QString::fromUtf8("_depthView"));
-
-        verticalLayout_2->addWidget(_depthView);
-
-
-        horizontalLayout->addLayout(verticalLayout_2);
-
-        horizontalSpacer = new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum);
+        horizontalSpacer = new QSpacerItem(40, 20, QSizePolicy::Preferred, QSizePolicy::Minimum);
 
         horizontalLayout->addItem(horizontalSpacer);
 
@@ -116,6 +106,12 @@ public:
 
         verticalLayout->addItem(verticalSpacer);
 
+        _fusion = new OpenCvWidget(centralwidget);
+        _fusion->setObjectName(QString::fromUtf8("_fusion"));
+        _fusion->setMinimumSize(QSize(0, 80));
+
+        verticalLayout->addWidget(_fusion);
+
         _labelResult = new QLabel(centralwidget);
         _labelResult->setObjectName(QString::fromUtf8("_labelResult"));
         QSizePolicy sizePolicy1(QSizePolicy::Maximum, QSizePolicy::Preferred);
@@ -138,7 +134,7 @@ public:
         MainWindow->setCentralWidget(centralwidget);
         menubar = new QMenuBar(MainWindow);
         menubar->setObjectName(QString::fromUtf8("menubar"));
-        menubar->setGeometry(QRect(0, 0, 875, 25));
+        menubar->setGeometry(QRect(0, 0, 875, 28));
         menuSettings = new QMenu(menubar);
         menuSettings->setObjectName(QString::fromUtf8("menuSettings"));
         menuImage = new QMenu(menubar);
