@@ -1,5 +1,5 @@
 #include "ConfigDialog.h"
-#include "ui_ConfigDialog.h"
+#include "../build/ui_ConfigDialog.h"
 
 #include <QDebug>
 #include <QFile>

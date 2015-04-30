@@ -43,35 +43,13 @@ bool IntrinsicCalibration::setImage(cv::Mat binaryImage, cv::Mat colorImage)
    _image_size = binaryImage.size();
 
 
-   // set up the parameters (check the defaults in opencv's code in blobdetector.cpp)
-   cv::SimpleBlobDetector::Params params;
-   params.minDistBetweenBlobs = 5.0f;
-   params.filterByInertia     = true;
-   params.filterByConvexity   = false;
-   params.filterByColor       = true;
-   params.filterByCircularity = false;
-   params.filterByArea        = true;
-   params.minArea             = 30.0f;
-   params.maxArea             = 3000.0f;
-   params.maxInertiaRatio     = 30.0f;
+   this->findPattern(binaryImage, colorImage, centers);
 
-   cv::Ptr<cv::FeatureDetector> _blob_detector = new cv::SimpleBlobDetector(params);
-   _blob_detector->create("SimpleBlob");
-
-
-   if (cv::findCirclesGrid(binaryImage, _pattern_size, centers,
-      (cv::CALIB_CB_SYMMETRIC_GRID | cv::CALIB_CB_ADAPTIVE_THRESH), _blob_detector))
-   {
-       cv::drawChessboardCorners(colorImage, _pattern_size, cv::Mat(centers), true);
-   }
-   else {
-       centers.clear();
-   }
 
    if(_capture) {
       _capture = false;
       // push back points for calibration
-      if(centers.size() > 0) {
+      if(centers.size() == 9*6) {
          _points.push_back(centers);
          qDebug() << _valid++;
          return true;
@@ -97,13 +75,28 @@ void IntrinsicCalibration::setCalibration(const cv::Mat& intrinsic, const cv::Ma
    _calibration_flag = true;
 }
 
+void IntrinsicCalibration::setImages(std::vector<cv::Mat> images)
+{
+   for(unsigned int i=0 ; i<images.size() ; i++)
+   {
+
+   }
+}
+
+
 
 bool IntrinsicCalibration::slot_calibrate(void)
 {
-   qDebug() << __PRETTY_FUNCTION__;
+
+   if(!_points.size() > 0) {
+      qDebug() << "not enough images";
+      return false;
+   }
+
+
    std::vector<std::vector<cv::Point3f> > coords(1);
 
-   _pattern_dist = 0.075;
+   _pattern_dist = 0.0375;
 
 
    for (    int row = 0; row < _pattern_size.height; row++)
@@ -115,15 +108,14 @@ bool IntrinsicCalibration::slot_calibrate(void)
    coords.resize(_points.size(), coords[0]);
    cv::Mat intrinsic( 3, 3, CV_64F);
    cv::Mat distortion(1, 8, CV_64F);
-   std::vector<cv::Mat> rvecs, tvecs;
 
-   QString out("-----------------");
-   qDebug() << "number of points   : " << _points.size() << "\n";
-   qDebug() << "rms error intrinsic: "
-          << cv::calibrateCamera(coords, _points, _image_size, intrinsic, distortion, rvecs, tvecs);
+   qDebug() << "----------------------------------------";
+   qDebug() << "number of frames   : " << _points.size();
+   qDebug() << "rms error intrinsic: " << cv::calibrateCamera(coords, _points, _image_size, intrinsic, distortion, _rvecs, _tvecs);
 
-    this->cvMatToQString(out, intrinsic);
-    qDebug() << out;
+//    this->cvMatToQString(out, intrinsic);
+
+//   cv::projectPoints(coords, rvecs, tvecs, intrinsic, distortion, _points );
 
    intrinsic.copyTo( _intrinsic);
    distortion.copyTo(_distortion);
@@ -131,6 +123,10 @@ bool IntrinsicCalibration::slot_calibrate(void)
 
    std::cout << _intrinsic  << std::endl;
    std::cout << _distortion << std::endl;
+
+   std::cout << "rvec: " << _rvecs.back() << std::endl;
+   std::cout << "tvec: " << _tvecs.back() << std::endl;
+
 
    this->saveToFile();
 
@@ -172,6 +168,74 @@ void IntrinsicCalibration::cvMatToQString(QString& string, const cv::Mat& mat)
         }
         stream << "\n";
     }
+}
+
+bool IntrinsicCalibration::findPattern(cv::Mat& image, cv::Mat& viz_image, std::vector<cv::Point2f>& centers)
+{
+   // set up the parameters (check the defaults in opencv's code in blobdetector.cpp)
+   cv::SimpleBlobDetector::Params params;
+   params.minDistBetweenBlobs = 5.0f;
+   params.filterByInertia     = true;
+   params.filterByConvexity   = false;
+   params.filterByColor       = true;
+   params.filterByCircularity = false;
+   params.filterByArea        = true;
+   params.minArea             = 30.0f;
+   params.maxArea             = 3000.0f;
+   params.maxInertiaRatio     = 30.0f;
+
+   cv::Ptr<cv::FeatureDetector> _blob_detector = new cv::SimpleBlobDetector(params);
+   _blob_detector->create("SimpleBlob");
+
+
+   if (cv::findCirclesGrid(image, _pattern_size, centers,
+      (cv::CALIB_CB_SYMMETRIC_GRID | cv::CALIB_CB_ADAPTIVE_THRESH), _blob_detector))
+   {
+       cv::drawChessboardCorners(viz_image, _pattern_size, cv::Mat(centers), true);
+
+       if(_calibration_flag == true)
+       {
+          std::vector<cv::Point2d> imagePoints, imageFramePoints, imageOrigin;
+          std::vector<cv::Point3d> framePoints;
+
+
+          //generate points in the reference frame
+          framePoints.push_back( cv::Point3d( 0.0, 0.0, 0.0 ) );
+          framePoints.push_back( cv::Point3d( 5.0, 0.0, 0.0 ) );
+          framePoints.push_back( cv::Point3d( 0.0, 5.0, 0.0 ) );
+          framePoints.push_back( cv::Point3d( 0.0, 0.0, 5.0 ) );
+
+          std::vector<cv::Point3d> boardPoints;
+
+          //generate vectors for the points on the chessboard
+          for (int i=0; i<6; i++) {
+             for (int j=0; j<9; j++) {
+                boardPoints.push_back( cv::Point3d( double(i), double(j), 0.0) );
+             }
+          }
+
+          cv::Mat rvec = cv::Mat(cv::Size(3,1), CV_64F);
+          cv::Mat tvec = cv::Mat(cv::Size(3,1), CV_64F);
+
+          cv::solvePnP( cv::Mat(boardPoints), centers,  _intrinsic, _distortion, rvec, tvec, false );
+          cv::projectPoints(framePoints, rvec, tvec,    _intrinsic, _distortion, imageFramePoints );
+
+          std::cout << "rvec: " << rvec << std::endl;
+          std::cout << "tvec: " << tvec << std::endl;
+
+          unsigned int thickness = 6;
+          cv::line(viz_image, imageFramePoints[0], imageFramePoints[1], CV_RGB(255,0,0), thickness );
+          cv::line(viz_image, imageFramePoints[0], imageFramePoints[2], CV_RGB(0,255,0), thickness );
+          cv::line(viz_image, imageFramePoints[0], imageFramePoints[3], CV_RGB(0,0,255), thickness );
+
+       }
+
+
+       return true;
+   }
+
+   return false;
+
 }
 
 void IntrinsicCalibration::saveToFile(void)

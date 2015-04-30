@@ -73,9 +73,11 @@ public slots:
     * Slot to update visualization
     */
    void update(void);
+   void slot_capture(void);
 
 private slots:
    void slot_calibrate(void);
+   void slot_calibrateExtrinsic(void);
 
 private:
    ISensor*                   _sensor;

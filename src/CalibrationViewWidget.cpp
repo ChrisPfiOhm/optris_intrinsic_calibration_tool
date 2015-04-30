@@ -6,7 +6,7 @@
  */
 
 #include <CalibrationViewWidget.h>
-#include <ui_CalibrationViewWidget.h>
+#include <../build/ui_CalibrationViewWidget.h>
 
 CalibrationViewWidget::CalibrationViewWidget(QWidget* parent)
 : QWidget(parent),
@@ -16,8 +16,10 @@ CalibrationViewWidget::CalibrationViewWidget(QWidget* parent)
 {
    _ui->setupUi(this);
 
-   _ui->_binViewer->setSize(QSize(320,240));
+   _ui->_binViewer->setSize(  QSize(320,240));
    _ui->_colorViewer->setSize(QSize(320,240));
+
+   _ui->_calibrateExtrinsic->setEnabled(false);
 }
 
 
@@ -52,8 +54,9 @@ void CalibrationViewWidget::setIntrinsicCalibration(IntrinsicCalibration* intrin
    _intrinsic = intrinsic;
 
    // SIGNALS AND SLOTS
-   this->connect(_ui->_captureButton,   SIGNAL(clicked()),   _intrinsic, SLOT(slot_capture()));
-   this->connect(_ui->_calibrateButton, SIGNAL(clicked()),   this, SLOT(slot_calibrate()));
+   this->connect(_ui->_captureButton,      SIGNAL(clicked()),   this,       SLOT(slot_capture()));
+   this->connect(_ui->_calibrateButton,    SIGNAL(clicked()),   this,       SLOT(slot_calibrate()));
+   this->connect(_ui->_calibrateExtrinsic, SIGNAL(clicked()),this,          SLOT(slot_calibrateExtrinsic()));
 //   this->connect(_ui->_,      SIGNAL(clicked()),   _intrinsic, SLOT(slot_save()));
 }
 
@@ -64,6 +67,7 @@ void CalibrationViewWidget::update(void)
 
    cv::Mat bin   =  _sensor->getCalibrationImage();
    cv::Mat viz   =  _sensor->getVisualizationImage();
+
 
    if(_intrinsic) {
 //      _intrinsic->setCalibration(_sensor->getIntrinsic(), _sensor->getDistortion());
@@ -78,6 +82,11 @@ void CalibrationViewWidget::update(void)
    this->setColorImage(viz);
 }
 
+void CalibrationViewWidget::slot_capture(void)
+{
+   _intrinsic->slot_capture();
+   _ui->_images->addImage(_sensor->getCalibrationImage());
+}
 
 void CalibrationViewWidget::slot_calibrate(void)
 {
@@ -85,4 +94,9 @@ void CalibrationViewWidget::slot_calibrate(void)
    _sensor->setIntrinsic( _intrinsic->getIntrinsic());
    _sensor->setDistortion(_intrinsic->getDistortion());
    _sensor->slot_saveConfig("/tmp/thermo_intrinsic.ini");
+}
+
+void CalibrationViewWidget::slot_calibrateExtrinsic(void)
+{
+
 }

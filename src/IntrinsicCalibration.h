@@ -58,6 +58,7 @@ public:
     */
    void setCalibration(const cv::Mat& intrinsic, const cv::Mat& distortion);
 
+   void setImages(std::vector<cv::Mat> images);
 
    // GETTERS
    /**
@@ -112,6 +113,8 @@ private:
     */
    void cvMatToQString(QString& string, const cv::Mat& mat);
 
+   bool findPattern(cv::Mat& image, cv::Mat& viz_image,  std::vector<cv::Point2f>& centers);
+
    std::vector<std::vector<cv::Point2f> > _points;                //!< container for all found valid blobs
 
    // Settings for pattern
@@ -121,6 +124,9 @@ private:
 
    cv::Mat               _intrinsic;               //!< matrix with intrinsic coefficients
    cv::Mat               _distortion;              //!< matrix with distortion coefficients
+
+   std::vector<cv::Mat>  _rvecs;                   //!< rotation vector
+   std::vector<cv::Mat>  _tvecs;                   //!< translation vector
 
    cv::Mat               _undistored;              //!< undistored image
 
