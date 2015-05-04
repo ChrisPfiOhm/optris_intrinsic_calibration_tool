@@ -12,7 +12,7 @@ INCLUDE_DIRECTORIES(${PCL_INCLUDE_DIRS})
 
 add_definitions(${QT_DEFINITIONS})
 add_definitions(${PCL_DEFINITIONS})
-add_definitions(-Wall -O2 -ffast-math -funroll-loops -ftree-vectorize -fomit-frame-pointer -pipe -mfpmath=sse -mmmx -msse -mtune=core2 -march=core2 -msse2 -msse3 -mssse3 -msse4)
+add_definitions(-Wall -O2 -ffast-math -ftree-vectorize -fomit-frame-pointer -pipe -mfpmath=sse -mmmx -msse -mtune=core2 -march=core2 -msse2 -msse3 -mssse3 -msse4)
 
 
 set(MOC_HEADERS
@@ -23,12 +23,14 @@ set(MOC_HEADERS
     ${SRC_DIR}/MainWindow.h
     ${SRC_DIR}/ConfigDialog.h
     ${SRC_DIR}/IntrinsicCalibration.h
+    ${SRC_DIR}/ImageContainerWidget.h
     )
 
 set(FORMS
     ${FORM_DIR}/MainWindow.ui
     ${FORM_DIR}/ConfigDialog.ui
     ${FORM_DIR}/CalibrationViewWidget.ui
+    ${FORM_DIR}/ImageContainerWidget.ui
     )
 
 SET(GUI_RESOURCES ${PROJECT_SOURCE_DIR}/../resources/resources.qrc)
@@ -55,9 +57,10 @@ add_executable(optris-calibration-tool
                ${SRC_DIR}/sensors/ThermoCamThread.cpp
                ${SRC_DIR}/sensors/ThermoCam.cpp
                ${SRC_DIR}/sensors/Openni.cpp
+               ${SRC_DIR}/sensors/CheckDevices.cpp
                ${SRC_DIR}/ConfigDialog.cpp
                ${SRC_DIR}/IntrinsicCalibration.cpp
-               ${SRC_DIR}/ExtrinsicCalibration.cpp
+               ${SRC_DIR}/ImageContainerWidget.cpp
                
                ${SRC_DIR}/sensors/RGBCamera.cpp
                ${HEADERS_MOC}
@@ -73,3 +76,4 @@ target_link_libraries(optris-calibration-tool
                       irimageprocessing
                       udev
                       )
+                      

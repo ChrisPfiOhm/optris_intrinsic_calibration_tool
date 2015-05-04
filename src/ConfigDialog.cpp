@@ -11,20 +11,15 @@ ConfigDialog::ConfigDialog(QString path, QWidget* parent)
     : QDialog(parent),
       _ui(new Ui::ConfigDialog)
 {
-
    _ui->setupUi(this);
-
-
 
    if(QFile::exists(path)) this->loadConfig("/home/chris/workspace/optris_intrinsic_calibration_tool/config/pattern.ini");
    else                    qDebug() << __PRETTY_FUNCTION__ << "]: config file not found.";
 
-
    this->slot_patternChanged(0);
 
-
-   connect(_ui->_buttonBox,   SIGNAL(accepted()),                 this, SLOT(slot_accept()));
-   connect(_ui->_buttonBox,   SIGNAL(rejected()),                 this, SLOT(reject()));
+   connect(_ui->_buttonBox,   SIGNAL(accepted()),               this, SLOT(slot_accept()));
+   connect(_ui->_buttonBox,   SIGNAL(rejected()),               this, SLOT(reject()));
    connect(_ui->_patternBox,  SIGNAL(currentIndexChanged(int)), this, SLOT(slot_patternChanged(int)));
 }
 
@@ -33,8 +28,7 @@ void ConfigDialog::loadConfig(QString path)
 {
    _configPath = path;
    if(!path.length()) {
-       qDebug() << "[" << __PRETTY_FUNCTION__ << "]: config path not set.";
-       return;
+       qDebug() << "[" << __PRETTY_FUNCTION__ << "]: config path not set."; return;
    }
 
    QSettings settings(path, QSettings::NativeFormat);

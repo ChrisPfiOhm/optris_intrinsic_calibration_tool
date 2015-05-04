@@ -14,7 +14,6 @@
 // opencv includes
 #include <opencv2/core/core.hpp>
 
-
 // calibration includes
 #include <sensors/ISensor.h>
 #include "IntrinsicCalibration.h"
@@ -77,12 +76,13 @@ public slots:
 
 private slots:
    void slot_calibrate(void);
-   void slot_calibrateExtrinsic(void);
 
 private:
-   ISensor*                   _sensor;
-   IntrinsicCalibration*      _intrinsic;
-   Ui::CalibrationViewWidget* _ui;         //!< pointer on gui
+   ISensor*                   _sensor;             //!< pointer on sensor device
+   IntrinsicCalibration*      _intrinsic;          //!< instance of intrinsic calibration
+   Ui::CalibrationViewWidget* _ui;                 //!< pointer on gui
+
+   bool                       _initialized;        //!< flag if sensor is initialized correctly
 
 };
 

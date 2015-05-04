@@ -12,14 +12,15 @@ CalibrationViewWidget::CalibrationViewWidget(QWidget* parent)
 : QWidget(parent),
   _sensor(NULL),
   _intrinsic(NULL),
-  _ui(new Ui::CalibrationViewWidget)
+  _ui(new Ui::CalibrationViewWidget),
+  _initialized(false)
 {
    _ui->setupUi(this);
 
    _ui->_binViewer->setSize(  QSize(320,240));
    _ui->_colorViewer->setSize(QSize(320,240));
 
-   _ui->_calibrateExtrinsic->setEnabled(false);
+   _ui->_saveButton->setDisabled(true);
 }
 
 
@@ -38,14 +39,17 @@ void CalibrationViewWidget::setBinImage(const cv::Mat& image)
 void CalibrationViewWidget::setColorImage(const cv::Mat& image)
 {
    _ui->_colorViewer->setMat(image);
-
 }
 
 
 void CalibrationViewWidget::setSensor(ISensor* sensor, QString name)
 {
+   if(sensor == NULL)
+      return;
+
    _sensor = sensor;
    _ui->_sensorName->setText(name);
+   _initialized = true;
 }
 
 
@@ -56,13 +60,13 @@ void CalibrationViewWidget::setIntrinsicCalibration(IntrinsicCalibration* intrin
    // SIGNALS AND SLOTS
    this->connect(_ui->_captureButton,      SIGNAL(clicked()),   this,       SLOT(slot_capture()));
    this->connect(_ui->_calibrateButton,    SIGNAL(clicked()),   this,       SLOT(slot_calibrate()));
-   this->connect(_ui->_calibrateExtrinsic, SIGNAL(clicked()),this,          SLOT(slot_calibrateExtrinsic()));
-//   this->connect(_ui->_,      SIGNAL(clicked()),   _intrinsic, SLOT(slot_save()));
 }
 
 
 void CalibrationViewWidget::update(void)
 {
+   if(!_initialized)      return;
+
    _sensor->grab();
 
    cv::Mat bin   =  _sensor->getCalibrationImage();
@@ -70,7 +74,6 @@ void CalibrationViewWidget::update(void)
 
 
    if(_intrinsic) {
-//      _intrinsic->setCalibration(_sensor->getIntrinsic(), _sensor->getDistortion());
       _intrinsic->setImage(bin, viz);
 
       if(_intrinsic->calibrated()) {
@@ -94,9 +97,5 @@ void CalibrationViewWidget::slot_calibrate(void)
    _sensor->setIntrinsic( _intrinsic->getIntrinsic());
    _sensor->setDistortion(_intrinsic->getDistortion());
    _sensor->slot_saveConfig("/tmp/thermo_intrinsic.ini");
-}
-
-void CalibrationViewWidget::slot_calibrateExtrinsic(void)
-{
-
+   _ui->_saveButton->setDisabled(false);
 }

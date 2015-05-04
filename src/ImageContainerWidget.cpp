@@ -54,6 +54,7 @@ void ImageContainerWidget::addImage(const cv::Mat& image)
 
 
    QStandardItemModel *model = static_cast<QStandardItemModel*>(_ui->tableView->model());
+
    QStandardItem* item       = new QStandardItem(filename);
    item->setCheckable(true);
    item->setCheckState(Qt::Checked);

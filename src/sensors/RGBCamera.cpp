@@ -10,7 +10,8 @@
 #include "opencv2/highgui/highgui.hpp"
 
 RGBCamera::RGBCamera(const unsigned int id)
-:  _camera(new cv::VideoCapture(id))
+:  _camera(new cv::VideoCapture(id)),
+   _invert(false)
 {
 
 }
@@ -33,5 +34,5 @@ void RGBCamera::grab(void)
    cv::Mat viewGray;
    cvtColor(     _image, _bin, cv::COLOR_BGR2GRAY);
 
-   _bin =  cv::Scalar::all(255) - _bin;
+   if(_invert) _bin =  cv::Scalar::all(255) - _bin;
 }

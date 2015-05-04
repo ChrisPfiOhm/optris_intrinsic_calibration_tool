@@ -23,8 +23,8 @@ IntrinsicCalibration::IntrinsicCalibration(void)
 :  QObject(0),
    _pattern_type(ConfigDialog::SymCircles),
    _pattern_size(cv::Size(9, 6)),
+   _pattern_dist(0.0375),
    _valid(0),
-   _pattern_dist(0.075),
    _calibration_flag(false),
    _capture(false)
 {
@@ -42,9 +42,7 @@ bool IntrinsicCalibration::setImage(cv::Mat binaryImage, cv::Mat colorImage)
    std::vector<cv::Point2f> centers;
    _image_size = binaryImage.size();
 
-
    this->findPattern(binaryImage, colorImage, centers);
-
 
    if(_capture) {
       _capture = false;
@@ -55,7 +53,6 @@ bool IntrinsicCalibration::setImage(cv::Mat binaryImage, cv::Mat colorImage)
          return true;
       }
    }
-
    return false;
 }
 
@@ -74,6 +71,7 @@ void IntrinsicCalibration::setCalibration(const cv::Mat& intrinsic, const cv::Ma
    _distortion       = distortion;
    _calibration_flag = true;
 }
+
 
 void IntrinsicCalibration::setImages(std::vector<cv::Mat> images)
 {
@@ -95,38 +93,35 @@ bool IntrinsicCalibration::slot_calibrate(void)
 
 
    std::vector<std::vector<cv::Point3f> > coords(1);
-
-   _pattern_dist = 0.0375;
-
-
-   for (    int row = 0; row < _pattern_size.height; row++)
+   for (    int row = 0; row < _pattern_size.height; row++) {
        for (int col = 0; col < _pattern_size.width;  col++)
+       {
            coords[0].push_back(cv::Point3f(static_cast<float>(row) * _pattern_dist,
                                            static_cast<float>(col) * _pattern_dist,
                                            0.0));
+       }
+   }
 
    coords.resize(_points.size(), coords[0]);
    cv::Mat intrinsic( 3, 3, CV_64F);
    cv::Mat distortion(1, 8, CV_64F);
 
+   std::vector<cv::Mat>  rvecs;
+   std::vector<cv::Mat>  tvecs;
+
    qDebug() << "----------------------------------------";
    qDebug() << "number of frames   : " << _points.size();
-   qDebug() << "rms error intrinsic: " << cv::calibrateCamera(coords, _points, _image_size, intrinsic, distortion, _rvecs, _tvecs);
+   qDebug() << "rms error intrinsic: " << cv::calibrateCamera(coords, _points, _image_size, intrinsic, distortion, rvecs, tvecs);
 
 //    this->cvMatToQString(out, intrinsic);
 
-//   cv::projectPoints(coords, rvecs, tvecs, intrinsic, distortion, _points );
-
    intrinsic.copyTo( _intrinsic);
    distortion.copyTo(_distortion);
+
    _calibration_flag = true;
 
    std::cout << _intrinsic  << std::endl;
    std::cout << _distortion << std::endl;
-
-   std::cout << "rvec: " << _rvecs.back() << std::endl;
-   std::cout << "tvec: " << _tvecs.back() << std::endl;
-
 
    this->saveToFile();
 
@@ -198,7 +193,6 @@ bool IntrinsicCalibration::findPattern(cv::Mat& image, cv::Mat& viz_image, std::
           std::vector<cv::Point2d> imagePoints, imageFramePoints, imageOrigin;
           std::vector<cv::Point3d> framePoints;
 
-
           //generate points in the reference frame
           framePoints.push_back( cv::Point3d( 0.0, 0.0, 0.0 ) );
           framePoints.push_back( cv::Point3d( 5.0, 0.0, 0.0 ) );
@@ -220,20 +214,20 @@ bool IntrinsicCalibration::findPattern(cv::Mat& image, cv::Mat& viz_image, std::
           cv::solvePnP( cv::Mat(boardPoints), centers,  _intrinsic, _distortion, rvec, tvec, false );
           cv::projectPoints(framePoints, rvec, tvec,    _intrinsic, _distortion, imageFramePoints );
 
-          std::cout << "rvec: " << rvec << std::endl;
-          std::cout << "tvec: " << tvec << std::endl;
+//          std::cout << "rvec: " << rvec << std::endl;
+//          std::cout << "tvec: " << tvec*_pattern_dist << std::endl;
 
-          unsigned int thickness = 6;
+          _rvec = rvec;
+          _tvec = tvec*_pattern_dist;
+
+          // draw markers in image
+          const unsigned int thickness = 6;
           cv::line(viz_image, imageFramePoints[0], imageFramePoints[1], CV_RGB(255,0,0), thickness );
           cv::line(viz_image, imageFramePoints[0], imageFramePoints[2], CV_RGB(0,255,0), thickness );
           cv::line(viz_image, imageFramePoints[0], imageFramePoints[3], CV_RGB(0,0,255), thickness );
-
        }
-
-
        return true;
    }
-
    return false;
 
 }
@@ -253,6 +247,11 @@ void IntrinsicCalibration::slot_capture(void)
 {
    qDebug() << __PRETTY_FUNCTION__;
    _capture = true;
+}
+
+void IntrinsicCalibration::slot_reset(void)
+{
+   _points.clear();
 }
 
 

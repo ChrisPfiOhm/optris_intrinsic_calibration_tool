@@ -19,7 +19,6 @@
 #include "OpenCvWidget.h"
 
 #include "IntrinsicCalibration.h"
-#include "ExtrinsicCalibration.h"
 
 /**
  * @namespace Ui
@@ -38,7 +37,6 @@ class MainWindow;
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
-
 public:
     /**
      * Default constructor
@@ -61,26 +59,21 @@ private slots:
      */
     void slot_calibrationSettings(void);
 
-    void slot_stereoCalibrate(void);
-
     void slot_stereoCapture(void);
 
+    void slot_reset(void);
 
 private:
-    Ui::MainWindow*                        _ui;
-    QTimer                                 _timer;
+    Ui::MainWindow*       _ui;
+    QTimer                _timer;
 
-    ISensor*                               _openni_sensor;
-    ISensor*                               _thermo_sensor;
-    ISensor*                               _rgb_sensor;
-    ISensor*                               _rgb2_sensor;
+    ISensor*              _sensor1;
+    ISensor*              _sensor2;
 
+    IntrinsicCalibration  _intrinsic_sensor1;
+    IntrinsicCalibration  _intrinsic_sensor2;
 
-    IntrinsicCalibration                   _intrinsic_calibration_thermo;
-    IntrinsicCalibration                   _intrinsic_calibration_kinect;
-    ExtrinsicCalibration                   _extrinsic_calibration;
-
-    ConfigDialog*                          _dialog;
+    ConfigDialog*         _dialog;
 };
 
 #endif

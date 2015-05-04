@@ -78,6 +78,17 @@ public:
    const unsigned int& getNrOfValids(void) const { return _valid; }
 
    /**
+    * Function to return extrinsic translation vector after calibration
+    * @return
+    */
+   cv::Mat getTranslationVector(void) const      { return _tvec; }
+   /**
+    * Function to return extrinsic rotation vector after calibration
+    * @return
+    */
+   cv::Mat getRotationVector(void) const         { return _rvec; }
+
+   /**
     * Function to get undistored image
     */
    const cv::Mat getUndistored(const cv::Mat image);
@@ -104,6 +115,10 @@ public slots:
     * Slot to capture frame
     */
    void slot_capture(void);
+   /**
+    * Function to reset current calibration
+    */
+   void slot_reset(void);
 
 private:
    /**
@@ -115,7 +130,7 @@ private:
 
    bool findPattern(cv::Mat& image, cv::Mat& viz_image,  std::vector<cv::Point2f>& centers);
 
-   std::vector<std::vector<cv::Point2f> > _points;                //!< container for all found valid blobs
+   std::vector<std::vector<cv::Point2f> > _points; //!< container for all found valid blobs
 
    // Settings for pattern
    ConfigDialog::Pattern _pattern_type;            //!< type of pattern
@@ -125,8 +140,8 @@ private:
    cv::Mat               _intrinsic;               //!< matrix with intrinsic coefficients
    cv::Mat               _distortion;              //!< matrix with distortion coefficients
 
-   std::vector<cv::Mat>  _rvecs;                   //!< rotation vector
-   std::vector<cv::Mat>  _tvecs;                   //!< translation vector
+   cv::Mat               _rvec;                    //!< rotation vector
+   cv::Mat               _tvec;                    //!< translation vector
 
    cv::Mat               _undistored;              //!< undistored image
 

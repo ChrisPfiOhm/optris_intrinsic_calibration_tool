@@ -28,6 +28,9 @@
     </widget>
    </item>
    <item>
+    <widget class="QComboBox" name="_deviceCombo"/>
+   </item>
+   <item>
     <layout class="QVBoxLayout" name="verticalLayout">
      <item>
       <widget class="OpenCvWidget" name="_colorViewer" native="true">
@@ -56,31 +59,7 @@
       </widget>
      </item>
      <item>
-      <layout class="QHBoxLayout" name="horizontalLayout">
-       <property name="spacing">
-        <number>2</number>
-       </property>
-       <property name="sizeConstraint">
-        <enum>QLayout::SetFixedSize</enum>
-       </property>
-       <item>
-        <widget class="QLabel" name="_terminal">
-         <property name="text">
-          <string/>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QListView" name="listView">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-        </widget>
-       </item>
-      </layout>
+      <widget class="ImageContainerWidget" name="_images" native="true"/>
      </item>
     </layout>
    </item>
@@ -94,7 +73,7 @@
    <item>
     <widget class="QPushButton" name="_calibrateButton">
      <property name="text">
-      <string>Calibrate</string>
+      <string>Calibrate Intrinsic</string>
      </property>
     </widget>
    </item>
@@ -112,6 +91,12 @@
    <class>OpenCvWidget</class>
    <extends>QWidget</extends>
    <header>OpenCvWidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ImageContainerWidget</class>
+   <extends>QWidget</extends>
+   <header>ImageContainerWidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

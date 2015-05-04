@@ -43,7 +43,7 @@
        <enum>QLayout::SetMaximumSize</enum>
       </property>
       <item>
-       <widget class="QPushButton" name="_buttonCalibrate">
+       <widget class="QPushButton" name="_buttonCaliExt2">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
           <horstretch>0</horstretch>
@@ -51,26 +51,20 @@
          </sizepolicy>
         </property>
         <property name="text">
-         <string>Calibrate</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="_buttonCapture">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="text">
-         <string>Caputre</string>
+         <string>Calibrat Extrinsic for both Sensor</string>
         </property>
         <property name="checkable">
          <bool>true</bool>
         </property>
         <property name="checked">
          <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="_reset">
+        <property name="text">
+         <string>Reset</string>
         </property>
        </widget>
       </item>
@@ -134,7 +128,7 @@
      <x>0</x>
      <y>0</y>
      <width>875</width>
-     <height>28</height>
+     <height>25</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuSettings">

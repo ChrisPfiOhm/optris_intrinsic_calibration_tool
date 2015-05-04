@@ -47,12 +47,16 @@ public:
     */
    virtual void grab(void);
 
+   void invert(bool invert = true);
+
 
 private:
    cv::VideoCapture*        _camera;      //!< camera grabber
 
    cv::Mat                  _image;       //!< normal color image
    cv::Mat                  _bin;         //!< greyscale image
+
+   bool                     _invert;      //!< flag to invert binary image
 
 };
 #endif /* SRC_SENSORS_RGBCAMERA_H_ */

@@ -41,7 +41,10 @@ public:
     */
    void saveConfig(QString path);
 
-
+   /**
+    * Function to get threshold for filtering
+    * @return
+    */
    float threshold(void) const;
 
 
@@ -81,12 +84,12 @@ private slots:
 private:
     Ui::ConfigDialog* _ui;
 
-    Pattern       _pattern;
-    unsigned int  _cols;
-    unsigned int  _rows;
-    float         _dist;
+    Pattern           _pattern;
+    unsigned int      _cols;
+    unsigned int      _rows;
+    float             _dist;
 
-    QString       _configPath;
+    QString           _configPath;
 };
 
 #endif
