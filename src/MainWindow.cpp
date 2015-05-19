@@ -6,7 +6,6 @@
 #include <QTextStream>
 #include <QDir>
 
-#include <pcl/common/time.h>
 #include <iostream>
 
 #include "sensors/CheckDevices.h"

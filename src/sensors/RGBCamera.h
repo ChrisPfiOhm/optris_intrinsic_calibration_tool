@@ -46,7 +46,10 @@ public:
     * Function to grab image from device
     */
    virtual void grab(void);
-
+   /**
+    * Function to invert image for calibration
+    * @param invert
+    */
    void invert(bool invert = true);
 
 
