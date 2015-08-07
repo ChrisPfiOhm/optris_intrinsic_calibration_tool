@@ -15,8 +15,8 @@
 MainWindow::MainWindow(const char* configFile, QWidget* parent)
     : QMainWindow(parent),
       _ui(new Ui::MainWindow),
-      _sensor1(new RGBCamera(1)),
-      _sensor2(new RGBCamera(2)),
+      _sensor1(new ReadFromFile("/home/chris/CALIBRIERUNG_TEST/1/")),
+      _sensor2(new ReadFromFile("/home/chris/CALIBRIERUNG_TEST/1/")),
       _dialog(new ConfigDialog(QString(QDir::homePath() + "/workspace/optris_intrinsic_calibration_tool/config/pattern.ini")))
 {
     _ui->setupUi(this);
@@ -43,10 +43,7 @@ MainWindow::MainWindow(const char* configFile, QWidget* parent)
     _ui->_view1->setIntrinsicCalibration(&_intrinsic_sensor1);
     _ui->_view2->setIntrinsicCalibration(&_intrinsic_sensor2);
 
-    CheckDevices cd;
-    cd.check();
-
-    _timer.start(50);
+    _timer.start(2050);
 
 }
 

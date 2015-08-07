@@ -73,6 +73,7 @@ void CalibrationViewWidget::update(void)
    cv::Mat viz   =  _sensor->getVisualizationImage();
 
 
+
    if(_intrinsic) {
       _intrinsic->setImage(bin, viz);
 

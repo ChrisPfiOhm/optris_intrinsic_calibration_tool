@@ -55,6 +55,7 @@ add_executable(optris-calibration-tool
                ${SRC_DIR}/CalibrationViewWidget.cpp
                ${SRC_DIR}/MainWindow.cpp
                ${SRC_DIR}/sensors/ThermoCamThread.cpp
+               ${SRC_DIR}/sensors/ReadFromFile.cpp
                ${SRC_DIR}/sensors/ThermoCam.cpp
                ${SRC_DIR}/sensors/Openni.cpp
                ${SRC_DIR}/sensors/CheckDevices.cpp

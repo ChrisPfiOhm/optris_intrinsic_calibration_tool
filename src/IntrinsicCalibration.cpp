@@ -22,7 +22,7 @@
 IntrinsicCalibration::IntrinsicCalibration(void)
 :  QObject(0),
    _pattern_type(ConfigDialog::SymCircles),
-   _pattern_size(cv::Size(9, 6)),
+   _pattern_size(cv::Size(8, 5)),
    _pattern_dist(0.0375),
    _valid(0),
    _calibration_flag(false),
@@ -182,6 +182,7 @@ bool IntrinsicCalibration::findPattern(cv::Mat& image, cv::Mat& viz_image, std::
    cv::Ptr<cv::FeatureDetector> _blob_detector = new cv::SimpleBlobDetector(params);
    _blob_detector->create("SimpleBlob");
 
+   qDebug() << _pattern_size.height << "x" << _pattern_size.width;
 
    if (cv::findCirclesGrid(image, _pattern_size, centers,
       (cv::CALIB_CB_SYMMETRIC_GRID | cv::CALIB_CB_ADAPTIVE_THRESH), _blob_detector))
@@ -228,6 +229,7 @@ bool IntrinsicCalibration::findPattern(cv::Mat& image, cv::Mat& viz_image, std::
        }
        return true;
    }
+   qDebug() << "pattern not found";
    return false;
 
 }

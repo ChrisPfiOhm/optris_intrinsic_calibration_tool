@@ -13,6 +13,7 @@
 #include "sensors/Openni.h"
 #include "sensors/ThermoCam.h"
 #include "sensors/RGBCamera.h"
+#include "sensors/ReadFromFile.h"
 
 // widget includes
 #include "ConfigDialog.h"
